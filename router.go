@@ -8,6 +8,29 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var (
+	indexTmpls = []string{
+		"tmpl/base.tmpl",
+		"tmpl/scripts.tmpl",
+		"tmpl/style.tmpl",
+		"tmpl/index.tmpl",
+		"tmpl/links.tmpl",
+		"tmpl/prober.tmpl",
+		"tmpl/jquery.tmpl",
+	}
+	routes = []route{
+		newPage("/",
+			[]string{indexTmpls},
+			getIndexData,
+		),
+		simpleRoute{
+			"/connect",
+			"GET",
+			connect,
+		},
+	}
+)
+
 // NewRouter returns a new router.
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
@@ -31,6 +54,9 @@ type route interface {
 	Pattern() string
 	HandlerFunc() handlerFunc
 }
+
+// handlerFunc is a local alias of http.HandlerFunc to allow extra methods.
+type handlerFunc http.HandlerFunc
 
 // simpleRoute implements the route interface for simple endpoints.
 // TODO: better naming.
@@ -84,18 +110,3 @@ func (p page) HandlerFunc() handlerFunc {
 	}
 	return handlerFunc(fn).requireLogin()
 }
-
-var routes = []route{
-	newPage(
-		"/",
-		[]string{"tmpl/base.tmpl", "tmpl/scripts.tmpl", "tmpl/style.tmpl", "tmpl/index.tmpl", "tmpl/links.tmpl", "tmpl/prober.tmpl", "tmpl/jquery.tmpl"},
-		getIndexData,
-	),
-	simpleRoute{
-		"/connect",
-		"GET",
-		connect,
-	},
-}
-
-type handlerFunc http.HandlerFunc
