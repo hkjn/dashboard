@@ -2,30 +2,15 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
-
-	"github.com/golang/glog"
 
 	"hkjn.me/dashboard"
 )
 
-func createProbes() {
-	glog.Infof("Starting probes..\n")
+func main() {
 	for _, p := range dashboard.GetProbes() {
 		go p.Run()
 	}
-}
-
-func main() {
-	if !flag.Parsed() {
-		flag.Parse()
-	}
-
-	router := dashboard.NewRouter()
-
-	createProbes()
-
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", dashboard.NewRouter()))
 }
