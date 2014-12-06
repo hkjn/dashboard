@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	// Template for the alert email.
 	emailTemplate = `{{define "email"}}
 The probe <a href="http://fixme.com/#{{.Name}}">{{.Name}}</a> failed enough that this alert fired, as the arbitrary metric of 'badness' is {{.Badness}}, which we can all agree is a big number.<br/>
 The description of the probe is: &ldquo;{{.Desc}}&rdquo;<br/>
