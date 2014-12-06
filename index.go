@@ -6,21 +6,16 @@ import (
 	"hkjn.me/prober"
 )
 
-// linkInfo describes
-type linkInfo struct {
-	Name, URL string
-}
-
+// getIndexData returns the data for the index page.
 func getIndexData(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	data := struct {
-		ErrorMsg       string
-		Links          []linkInfo
+		ErrorMsg string
+		Links    []struct {
+			Name, URL string
+		}
 		Probes         []*prober.Probe
 		ProberDisabled bool
 	}{}
-	data.Links = []linkInfo{
-	//		linkInfo{"TODO", "/fixme_link_to_dashboard_goes_here"},
-	}
 	data.Probes = GetProbes()
 	data.ProberDisabled = *proberDisabled
 	return data, nil
