@@ -29,7 +29,7 @@ var (
 	}
 )
 
-// NewRouter returns a new router.
+// NewRouter returns a new router for the endpoints of the dashboard.
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, r := range routes {
