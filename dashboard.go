@@ -1,9 +1,9 @@
 // Package dashboard implements a web dashboard for monitoring.
-package dashboard
+package dashboard // import "hkjn.me/dashboard"
 
 import (
 	"hkjn.me/config"
-	"hkjn.me/dashboard/googleauth"
+	"hkjn.me/googleauth"
 	"hkjn.me/probes"
 )
 
@@ -13,7 +13,7 @@ var (
 The probe <a href="http://fixme.com/#{{.Name}}">{{.Name}}</a> failed enough that this alert fired, as the arbitrary metric of 'badness' is {{.Badness}}, which we can all agree is a big number.<br/>
 The description of the probe is: &ldquo;{{.Desc}}&rdquo;<br/>
 Failure details follow:<br/>
-{{range $r := .Records}}
+{{range $r := .Records.RecentFailures}}
   <h2>{{$r.Timestamp}} ({{$r.Ago}})</h2>
   <p>{{$r.Details}}</p>
 {{end}}
@@ -24,6 +24,9 @@ type Config struct {
 	Whitelist []string
 	Sendgrid  struct {
 		User, Password string
+	}
+	Alerts struct {
+		Sender, Recipient string
 	}
 	Service struct {
 		Id, Secret string
@@ -60,6 +63,6 @@ func init() {
 	})
 	probes.Config.Sendgrid = C.Sendgrid
 	probes.Config.Template = emailTemplate
-	probes.Config.Alert.Sender = "alerts-noreply@hkjn.me"
-	probes.Config.Alert.Recipient = "hekjon+alerts@gmail.com"
+	probes.Config.Alert.Sender = C.Alerts.Sender
+	probes.Config.Alert.Recipient = C.Alerts.Recipient
 }

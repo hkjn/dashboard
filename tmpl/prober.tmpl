@@ -12,13 +12,15 @@
 <p>{{$p.Desc}}</p>
 <h3 {{with $p.Alerting}}class="bad"{{end}}>Badness: {{$p.Badness}}</h3>
 {{range $j, $r := $p.Records }}
-<div class="probe_result">
-	{{if $r.Passed}}
-	<strong title="{{$r.Timestamp}} ({{$r.Ago}})" class="good">✓</strong>
-	{{else}}
-	<strong title="{{$r.Timestamp}} ({{$r.Ago}})" class="bad">x</strong>
-	{{end}}
+{{if $r.Passed}}
+<div class="probe_result good">
+	<strong title="{{$r.Timestamp}} ({{$r.Ago}})">✓</strong>
 </div>
+{{else}}
+<div class="probe_result bad">
+	<strong title="{{$r.Timestamp}} ({{$r.Ago}})">x</strong>
+</div>
+{{end}}
 {{end}}
 <br class="fixfloat" />
 {{with $p.Records.RecentFailures}}

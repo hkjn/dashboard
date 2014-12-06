@@ -1,33 +1,31 @@
 package dashboard
 
 import (
+	"flag"
 	"html/template"
 	"net/http"
+	"sync"
+
+	"hkjn.me/googleauth"
 
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 )
 
 var (
-	indexTmpls = []string{
+	authDisabled   = flag.Bool("no_auth", false, "disables authentication (use for testing only)")
+	parseFlagsOnce = sync.Once{}
+	indexTmpls     = []string{
 		"tmpl/base.tmpl",
 		"tmpl/scripts.tmpl",
 		"tmpl/style.tmpl",
 		"tmpl/index.tmpl",
 		"tmpl/links.tmpl",
 		"tmpl/prober.tmpl",
-		"tmpl/jquery.tmpl",
 	}
 	routes = []route{
-		newPage("/",
-			[]string{indexTmpls},
-			getIndexData,
-		),
-		simpleRoute{
-			"/connect",
-			"GET",
-			connect,
-		},
+		newPage("/", indexTmpls, getIndexData),
+		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
 	}
 )
 
@@ -52,42 +50,37 @@ func serveISE(w http.ResponseWriter) {
 type route interface {
 	Method() string
 	Pattern() string
-	HandlerFunc() handlerFunc
+	HandlerFunc() http.HandlerFunc
 }
-
-// handlerFunc is a local alias of http.HandlerFunc to allow extra methods.
-type handlerFunc http.HandlerFunc
 
 // simpleRoute implements the route interface for simple endpoints.
 // TODO: better naming.
 type simpleRoute struct {
 	pattern, method string
-	handlerFunc     handlerFunc
+	handlerFunc     http.HandlerFunc
 }
 
 func (r simpleRoute) Method() string { return r.method }
 
 func (r simpleRoute) Pattern() string { return r.pattern }
 
-func (r simpleRoute) HandlerFunc() handlerFunc { return r.handlerFunc }
+func (r simpleRoute) HandlerFunc() http.HandlerFunc { return r.handlerFunc }
 
-// renderFunc is a function to render a page.
-type renderFunc func(http.ResponseWriter, *http.Request) (interface{}, error)
+// getDataFn is a function to get template data.
+type getDataFn func(http.ResponseWriter, *http.Request) (interface{}, error)
 
 // page implements the route interface for endpoints that render HTML.
 type page struct {
-	pattern string
-	tmpl    *template.Template // backing template
-	render  renderFunc
+	pattern         string
+	tmpl            *template.Template // backing template
+	getTemplateData getDataFn
 }
 
-var loginTmpl = template.Must(template.ParseFiles("tmpl/login.tmpl", "tmpl/jquery.tmpl"))
-
-func newPage(pattern string, tmpls []string, renderFn renderFunc) *page {
+func newPage(pattern string, tmpls []string, getData getDataFn) *page {
 	return &page{
 		pattern,
 		template.Must(template.ParseFiles(tmpls...)),
-		renderFn,
+		getData,
 	}
 }
 
@@ -95,18 +88,31 @@ func (p page) Method() string { return "GET" }
 
 func (p page) Pattern() string { return p.pattern }
 
-func (p page) HandlerFunc() handlerFunc {
+func (p page) HandlerFunc() http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		data, err := p.render(w, r)
+		data, err := p.getTemplateData(w, r)
 		if err != nil {
+			glog.Errorf("error getting template data: %v\n", err)
 			serveISE(w)
 			return
 		}
 		err = p.tmpl.ExecuteTemplate(w, "base", data)
 		if err != nil {
+			glog.Errorf("error rendering template: %v\n", err)
 			serveISE(w)
 			return
 		}
 	}
-	return handlerFunc(fn).requireLogin()
+
+	parseFlagsOnce.Do(func() {
+		if !flag.Parsed() {
+			flag.Parse()
+		}
+	})
+	if *authDisabled {
+		glog.Infof("-disabled_auth is set, not checking credentials\n")
+	} else {
+		fn = googleauth.RequireLogin(fn)
+	}
+	return fn
 }
