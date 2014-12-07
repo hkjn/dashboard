@@ -56,7 +56,7 @@ type route interface {
 
 // simpleRoute implements the route interface for endpoints.
 type simpleRoute struct {
-	method, pattern string
+	pattern, method string
 	handlerFunc     http.HandlerFunc
 }
 
