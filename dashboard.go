@@ -29,6 +29,8 @@ Failure details follow:<br/>
 		Service struct {
 			Id, Secret string
 		}
+	}{}
+	probecfg = struct {
 		WebProbes []struct {
 			Target, Want, Name string
 		}
@@ -49,7 +51,8 @@ Failure details follow:<br/>
 )
 
 func init() {
-	config.MustLoad(&cfg)
+	config.MustLoad(&cfg, config.Name("config.yaml"))
+	config.MustLoad(&probecfg, config.Name("probes.yaml"))
 
 	googleauth.SetCredentials(cfg.Service.Id, cfg.Service.Secret)
 	googleauth.SetGatingFunc(func(gplusId string) bool {

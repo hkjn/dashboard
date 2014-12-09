@@ -21,7 +21,7 @@ var (
 
 func getWebProbes() []*prober.Probe {
 	probes := []*prober.Probe{}
-	for _, p := range cfg.WebProbes {
+	for _, p := range probecfg.WebProbes {
 		probes = append(probes,
 			webprobe.New(p.Target, "GET", http.StatusOK, webprobe.Name(p.Name), webprobe.InResponse(p.Want)))
 	}
@@ -30,7 +30,7 @@ func getWebProbes() []*prober.Probe {
 
 func getDnsProbe() *prober.Probe {
 	mxRecords := []*net.MX{}
-	r := cfg.DnsProbe.Records
+	r := probecfg.DnsProbe.Records
 	for _, mx := range r.Mx {
 		mxRecords = append(mxRecords, &net.MX{mx.Host, mx.Pref})
 	}
@@ -39,7 +39,7 @@ func getDnsProbe() *prober.Probe {
 		nsRecords = append(nsRecords, &net.NS{ns})
 	}
 	return dnsprobe.New(
-		cfg.DnsProbe.Target, dnsprobe.MX(mxRecords), dnsprobe.A(r.A),
+		probecfg.DnsProbe.Target, dnsprobe.MX(mxRecords), dnsprobe.A(r.A),
 		dnsprobe.NS(nsRecords), dnsprobe.CNAME(r.Cname), dnsprobe.TXT(r.Txt))
 }
 
