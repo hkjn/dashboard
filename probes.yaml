@@ -15,6 +15,9 @@ webprobes:
   - target: http://blog.hkjn.me
     name: BlogIndex
     want: Posts from all years
+  - target: http://www.hkjn.me/where
+    name: WhereAPI
+    want: me@hkjn.me was last seen
 # DNS probe settings.
 dnsprobe:
   target: hkjn.me
