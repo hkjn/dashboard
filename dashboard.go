@@ -2,7 +2,8 @@
 package dashboard // import "hkjn.me/dashboard"
 
 import (
-	"hkjn.me/config"
+  
+        	"hkjn.me/config"
 	"hkjn.me/googleauth"
 	"hkjn.me/probes"
 )
@@ -20,8 +21,9 @@ Failure details follow:<br/>
 	// Structure of config.yaml.
 	cfg = struct {
 		Whitelist []string
+
 		Sendgrid  struct {
-			User, Password string
+User, Password string
 		}
 		Alerts struct {
 			Sender, Recipient string
@@ -64,7 +66,7 @@ func init() {
 		return false
 	})
 	probes.Config.Sendgrid = cfg.Sendgrid
-	probes.Config.Template = emailTemplate
+probes.Config.Template = emailTemplate
 	probes.Config.Alert.Sender = cfg.Alerts.Sender
 	probes.Config.Alert.Recipient = cfg.Alerts.Recipient
 }
