@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"sync"
 
+	// Generated with `go-bindata -pkg="bindata" -o bindata/bin.go tmpl/`
+	// from the base directory.
+	"hkjn.me/dashboard/bindata"
 	"hkjn.me/googleauth"
 
 	"github.com/golang/glog"
@@ -27,6 +30,7 @@ var (
 		newPage("/", indexTmpls, getIndexData),
 		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
 	}
+	baseTemplate = "base"
 )
 
 // NewRouter returns a new router for the endpoints of the dashboard.
@@ -78,9 +82,17 @@ type page struct {
 
 // newPage returns a new page.
 func newPage(pattern string, tmpls []string, getData getDataFn) *page {
+	assets := []byte{}
+	for _, t := range tmpls {
+		b, err := bindata.Asset(t)
+		if err != nil {
+			glog.Fatalf("can't load asset %q: %v\n", t, err)
+		}
+		assets = append(assets, b...)
+	}
 	return &page{
 		pattern,
-		template.Must(template.ParseFiles(tmpls...)),
+		template.Must(template.New(baseTemplate).Parse(string(assets))),
 		getData,
 	}
 }
@@ -99,7 +111,7 @@ func (p page) HandlerFunc() http.HandlerFunc {
 			serveISE(w)
 			return
 		}
-		err = p.tmpl.ExecuteTemplate(w, "base", data)
+		err = p.tmpl.ExecuteTemplate(w, baseTemplate, data)
 		if err != nil {
 			glog.Errorf("error rendering template: %v\n", err)
 			serveISE(w)
