@@ -1,0 +1,6 @@
+# Overrides to test config.
+twitter:
+  token: "zomgAnewFakeToken" # Replaces original value.
+  # Twitter test accounts.
+  testaccounts: # Added to the original list.
+    - notarealaccount3

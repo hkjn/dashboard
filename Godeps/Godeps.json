@@ -1,0 +1,65 @@
+{
+	"ImportPath": "hkjn.me/dashboard",
+	"GoVersion": "go1.3.3",
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/goauth2/oauth",
+			"Comment": "weekly-56",
+			"Rev": "afe77d958c701557ec5dc56f6936fcc194d15520"
+		},
+		{
+			"ImportPath": "github.com/golang/glog",
+			"Rev": "d1c4472bf2efd3826f2b5bdcc02d8416798d678c"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "14f550f51af52180c2eefed15e5fd18d63c0a64a"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
+		},
+		{
+			"ImportPath": "github.com/gorilla/securecookie",
+			"Rev": "1b0c7f6e9ab3d7f500fd7d50c7ad835ff428139b"
+		},
+		{
+			"ImportPath": "github.com/gorilla/sessions",
+			"Rev": "aa5e036e6c44aec69a32eb41097001978b29ad31"
+		},
+		{
+			"ImportPath": "github.com/sendgrid/sendgrid-go",
+			"Comment": "v1.0.0-6-g63195ba",
+			"Rev": "63195ba65f3627d7443f98d579093dcb69b88370"
+		},
+		{
+			"ImportPath": "github.com/sendgrid/smtpapi-go",
+			"Comment": "v0.2.1-5-g2ba4c2f",
+			"Rev": "2ba4c2fbe4c9b0bb6d129d9a0f6f9c93a786d20e"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "eca94c41d994ae2215d455ce578ae6e2dc6ee516"
+		},
+		{
+			"ImportPath": "hkjn.me/config",
+			"Rev": "4560bc8aeddd897472b9169523d58a08221cbeae"
+		},
+		{
+			"ImportPath": "hkjn.me/googleauth",
+			"Rev": "fb4fd6181a3a8ab5ea908f13bd1f126612fc4368"
+		},
+		{
+			"ImportPath": "hkjn.me/prober",
+			"Rev": "30676c65c9ebfef09fcfbc8d3fbc894850d3464a"
+		},
+		{
+			"ImportPath": "hkjn.me/probes",
+			"Rev": "e48a6caf8309dc2484e5f4a3e74f3bdd082bf582"
+		},
+		{
+			"ImportPath": "hkjn.me/timeutils",
+			"Rev": "1626a1894d00a3e6bf4c8e5ef5f7a776860b38c3"
+		}
+	]
+}
