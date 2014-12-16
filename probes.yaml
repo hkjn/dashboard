@@ -5,7 +5,7 @@ webprobes:
     want: I like efficiency
   - target: http://hkjn.me/dashboard
     name: GolangPackageDocs
-    want: dashboard - GoDoc
+    want: https://godoc.org/hkjn.me/dashboard
   - target: http://hkjn.me/dashboard?go-get=1
     name: GolangPackageImport
     want: <meta name="go-import" content="hkjn.me/dashboard git https://github.com/hkjn/dashboard">
