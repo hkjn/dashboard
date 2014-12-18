@@ -43,8 +43,8 @@ func getDnsProbe() *prober.Probe {
 		dnsprobe.NS(nsRecords), dnsprobe.CNAME(r.Cname), dnsprobe.TXT(r.Txt))
 }
 
-// GetProbes returns all probes in the dashboard.
-func GetProbes() []*prober.Probe {
+// getProbes returns all probes in the dashboard.
+func getProbes() []*prober.Probe {
 	createOnce.Do(func() {
 		if !flag.Parsed() {
 			flag.Parse()

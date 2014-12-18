@@ -73,8 +73,7 @@ func (c *configT) Load() error {
 	c.loaded = true
 
 	glog.Infoln("Starting probes..")
-	// TODO: how to expose GetProbes to gomon?
-	for _, p := range GetProbes() {
+	for _, p := range getProbes() {
 		go p.Run()
 	}
 
@@ -93,8 +92,6 @@ func (c *configT) Load() error {
 	probes.Config.Alert.Recipient = cfg.Alerts.Recipient
 	return nil
 }
-
-func Version() string { return cfg.Version }
 
 func Live() bool { return cfg.Live }
 
