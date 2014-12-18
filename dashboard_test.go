@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestNewRouter(t *testing.T) {
+func TestStart(t *testing.T) {
 	cases := []struct {
 		method         string
 		pattern        string
@@ -19,10 +19,9 @@ func TestNewRouter(t *testing.T) {
 		{"GET", "/", 200, "g-signin", true},
 		{"GET", "/", 200, "WebProber", false},
 	}
-
 	for i, tt := range cases {
 		*authDisabled = !tt.auth
-		router := NewRouter()
+		router := Start()
 
 		req, err := http.NewRequest(tt.method, tt.pattern, nil)
 		if err != nil {

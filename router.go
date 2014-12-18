@@ -3,6 +3,7 @@ package dashboard
 import (
 	"flag"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
 
@@ -37,7 +38,12 @@ var (
 )
 
 // newRouter returns a new router for the endpoints of the dashboard.
+//
+// newRouter panics if the config wasn't loaded.
 func newRouter() *mux.Router {
+	if !cfg.loaded { // this is a bug.
+		log.Fatalln("internal: config was never loaded")
+	}
 	routes := []route{
 		newPage("/", indexTmpls, getIndexData),
 		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
