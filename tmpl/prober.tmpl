@@ -5,7 +5,8 @@
 <a href="#" class="hide">Hide probe results</a>
 <div id="probe_info">
 {{range $i, $p := .}}
-<h2>{{$p.Name}}</h2>
+<h2><a href="#{{$p.Name}}">{{$p.Name}}</a></h2>
+<a name="{{$p.Name}}" />
 {{if $p.Disabled}}
 <p class="bad">Disabled</p>
 {{else}}
