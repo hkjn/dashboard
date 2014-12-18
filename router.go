@@ -65,7 +65,12 @@ func newRouter() *mux.Router {
 // getTemplate uses the bindata package on live, and otherwise parses
 // the .tmpl files from disk.
 func getTemplate(tmpls []string) *template.Template {
-	if Live() {
+	live := true
+	if cfg.loaded {
+		live = cfg.Live
+	}
+	glog.Infof("we're live? %v\n", live)
+	if live {
 		assets := []byte{}
 		for _, t := range tmpls {
 			b, err := bindata.Asset(t)

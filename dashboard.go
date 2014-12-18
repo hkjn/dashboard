@@ -93,8 +93,6 @@ func (c *configT) Load() error {
 	return nil
 }
 
-func Live() bool { return cfg.Live }
-
 // Start returns the HTTP routes for the dashboard.
 //
 // If config.yaml is missing, the dashboard will remain inactive, but
