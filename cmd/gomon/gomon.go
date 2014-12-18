@@ -16,7 +16,7 @@ var bindAddress = ":8080"
 func main() {
 	flag.Parse()
 	glog.Infof("gomon version %s initializing..\n", dashboard.Version())
-	glog.Infoln("Starting probes..\n")
+	glog.Infoln("Starting probes..")
 	for _, p := range dashboard.GetProbes() {
 		go p.Run()
 	}
