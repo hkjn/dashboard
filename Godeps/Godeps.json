@@ -39,7 +39,7 @@
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "eca94c41d994ae2215d455ce578ae6e2dc6ee516"
+			"Rev": "74763dcdf724ee1aabd6f4e85531b9eaff1a17b6"
 		},
 		{
 			"ImportPath": "hkjn.me/config",
@@ -47,7 +47,7 @@
 		},
 		{
 			"ImportPath": "hkjn.me/googleauth",
-			"Rev": "fb4fd6181a3a8ab5ea908f13bd1f126612fc4368"
+			"Rev": "373aeec4df851830f0023732f90ebfa97483cb78"
 		},
 		{
 			"ImportPath": "hkjn.me/prober",
@@ -55,7 +55,7 @@
 		},
 		{
 			"ImportPath": "hkjn.me/probes",
-			"Rev": "e48a6caf8309dc2484e5f4a3e74f3bdd082bf582"
+			"Rev": "1f18918cca0ca37cd6562a7132bcbb3bc8024cd8"
 		},
 		{
 			"ImportPath": "hkjn.me/timeutils",

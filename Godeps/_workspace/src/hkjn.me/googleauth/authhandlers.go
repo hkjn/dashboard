@@ -75,7 +75,7 @@ function signInCallback(authResult) {
 {{end}}`
 )
 
-// RequireLogin returns a wrapped handler func that enforces Google+ login.
+// RequireLogin returns a wrapped HandlerFunc that enforces Google+ login.
 //
 // If the user is logged in, the specified HandlerFunc is called, otherwise the
 // login page defined by LoginTmpl is served.
