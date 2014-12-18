@@ -3,7 +3,6 @@ package dashboard
 import (
 	"flag"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 
@@ -41,9 +40,6 @@ var (
 //
 // newRouter panics if the config wasn't loaded.
 func newRouter() *mux.Router {
-	if !cfg.loaded { // this is a bug.
-		log.Fatalln("internal: config was never loaded")
-	}
 	routes := []route{
 		newPage("/", indexTmpls, getIndexData),
 		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
@@ -66,7 +62,7 @@ func newRouter() *mux.Router {
 // the .tmpl files from disk.
 func getTemplate(tmpls []string) *template.Template {
 	live := true
-	if cfg.loaded {
+	if cfg.loaded { // TODO: improve this hack.
 		live = cfg.Live
 	}
 	glog.Infof("we're live? %v\n", live)
