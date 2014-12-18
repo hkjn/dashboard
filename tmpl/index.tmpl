@@ -1,7 +1,8 @@
 {{/* index.tmpl: simple monitoring dashboard */}}
 {{define "main"}}
 
-{{with .ErrorMsg}}<p class="error"><strong>{{.}}</strong></p>{{end}}
+<h1>Gomon</h1>
+<p id="version"><strong>Version {{.Version}}</strong></p>
 {{template "links" .Links}}
 {{with .ProberDisabled}}
   <h1 class="bad">Prober disabled</h1>
