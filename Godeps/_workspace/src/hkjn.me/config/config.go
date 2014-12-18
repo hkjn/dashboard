@@ -111,7 +111,7 @@ func tryLoad(name string, v interface{}) error {
 			return err // not missing file; something else is wrong, so bail.
 		}
 	}
-	return fmt.Errorf("failed to find a valid %s: %v", name, err)
+	return err
 }
 
 // loadPath parses the YAML-encoded config at path and stores the
