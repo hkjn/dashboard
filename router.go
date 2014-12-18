@@ -26,18 +26,19 @@ var (
 		"tmpl/links.tmpl",
 		"tmpl/prober.tmpl",
 	}
-	routes = []route{
-		newPage("/", indexTmpls, getIndexData),
-		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
-	}
 	baseTemplate = "base"
 )
 
 // NewRouter returns a new router for the endpoints of the dashboard.
 func NewRouter() *mux.Router {
+	routes := []route{
+		newPage("/", indexTmpls, getIndexData),
+		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
+	}
+
 	router := mux.NewRouter().StrictSlash(true)
 	for _, r := range routes {
-		glog.V(1).Infof("registering route for %q on %q\n", r.Method(), r.Pattern())
+		glog.V(1).Infof("Registering route for %q on %q\n", r.Method(), r.Pattern())
 		router.
 			Methods(r.Method()).
 			Path(r.Pattern()).
@@ -82,17 +83,26 @@ type page struct {
 
 // newPage returns a new page.
 func newPage(pattern string, tmpls []string, getData getDataFn) *page {
-	assets := []byte{}
-	for _, t := range tmpls {
-		b, err := bindata.Asset(t)
-		if err != nil {
-			glog.Fatalf("can't load asset %q: %v\n", t, err)
+	getTemplate := func() *template.Template {
+		if Live() {
+			assets := []byte{}
+			for _, t := range tmpls {
+				b, err := bindata.Asset(t)
+				if err != nil {
+					glog.Fatalf("can't load asset %q: %v\n", t, err)
+				}
+				assets = append(assets, b...)
+			}
+			return template.Must(template.New(baseTemplate).Parse(string(assets)))
 		}
-		assets = append(assets, b...)
+		// TODO: automatically rebuild bindata (and gofmt -w it, since it
+		// isn't competent enough to do that..) in deploy.sh.
+		// Read from local disk on dev.
+		return template.Must(template.ParseFiles(tmpls...))
 	}
 	return &page{
 		pattern,
-		template.Must(template.New(baseTemplate).Parse(string(assets))),
+		getTemplate(),
 		getData,
 	}
 }
