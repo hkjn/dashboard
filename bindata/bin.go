@@ -81,6 +81,26 @@ func tmpl_base_tmpl() (*asset, error) {
 	return a, nil
 }
 
+var _tmpl_config_missing_tmpl = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xaa\xae\x4e\x49\x4d\xcb\xcc\x4b\x55\x50\xca\x4d\xcc\xcc\x53\xaa\xad\xe5\xb2\xc9\x30\x54\x48\xce\x49\x2c\x2e\xb6\x55\x4a\x4a\x4c\x51\xb2\xf3\xcb\x57\x48\xce\xcf\x4b\xcb\x4c\xd7\xab\x4c\xcc\xcd\x51\x28\x28\x4a\x2d\x4e\xcd\x2b\xd1\xb3\xd1\xcf\x30\xb4\xe3\xaa\xae\x4e\xcd\x4b\x01\x6a\x02\x04\x00\x00\xff\xff\x3d\x30\x50\x48\x47\x00\x00\x00")
+
+func tmpl_config_missing_tmpl_bytes() ([]byte, error) {
+	return bindata_read(
+		_tmpl_config_missing_tmpl,
+		"tmpl/config_missing.tmpl",
+	)
+}
+
+func tmpl_config_missing_tmpl() (*asset, error) {
+	bytes, err := tmpl_config_missing_tmpl_bytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindata_file_info{name: "tmpl/config_missing.tmpl", size: 71, mode: os.FileMode(420), modTime: time.Unix(1418909988, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _tmpl_index_tmpl = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x4c\x8e\xb1\x4e\xc4\x30\x0c\x86\xf7\x3e\x85\x95\xf1\x86\x46\xac\x28\x97\x09\x89\x85\x81\x89\x3d\xc5\xe6\x6a\x91\x3a\x55\x1c\x01\x52\xd4\x77\xc7\xd7\x76\xb8\xe9\xb7\xec\x2f\xff\x97\xde\xfd\x05\x58\x90\xfe\xc6\xb6\xac\xf9\x19\x94\x2d\x08\x96\x22\xdc\x4a\x65\xb9\x01\x26\x9d\xa7\x92\x2a\xc2\xc5\x6f\xdb\xd0\x3b\xd2\x17\x0b\x81\x5b\x12\x8b\xb3\xcd\x10\xe6\xa7\xf8\x5a\xec\x49\xf0\x36\x0d\x61\x05\xc6\xab\xfb\xa1\xaa\x5c\xc4\xc5\xa0\xad\x16\xb9\xc5\x8f\x63\x01\xbd\x8f\xe7\xb8\x6d\xc1\x9f\xc7\xe0\xd7\x68\xdd\x8d\x4c\x9f\x9a\xb5\x67\x96\x6f\x75\x30\xbe\xdd\x73\xf7\xfe\x72\x9b\x61\x7c\xaf\x65\xa2\xfa\xc2\x9a\xa6\x4c\x68\x07\x00\xf3\xc3\x67\x4e\xaa\x57\x37\x25\x74\xf1\x40\x00\x4f\xe6\xf8\x55\xef\x94\x95\x76\xfe\x51\xb3\xee\xac\x3b\x7b\x0f\x11\x09\x3e\xe4\x7f\x00\x00\x00\xff\xff\xad\x8e\xff\xbc\x23\x01\x00\x00")
 
 func tmpl_index_tmpl_bytes() ([]byte, error) {
@@ -242,13 +262,14 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"tmpl/base.tmpl":    tmpl_base_tmpl,
-	"tmpl/index.tmpl":   tmpl_index_tmpl,
-	"tmpl/links.tmpl":   tmpl_links_tmpl,
-	"tmpl/login.tmpl":   tmpl_login_tmpl,
-	"tmpl/prober.tmpl":  tmpl_prober_tmpl,
-	"tmpl/scripts.tmpl": tmpl_scripts_tmpl,
-	"tmpl/style.tmpl":   tmpl_style_tmpl,
+	"tmpl/base.tmpl":           tmpl_base_tmpl,
+	"tmpl/config_missing.tmpl": tmpl_config_missing_tmpl,
+	"tmpl/index.tmpl":          tmpl_index_tmpl,
+	"tmpl/links.tmpl":          tmpl_links_tmpl,
+	"tmpl/login.tmpl":          tmpl_login_tmpl,
+	"tmpl/prober.tmpl":         tmpl_prober_tmpl,
+	"tmpl/scripts.tmpl":        tmpl_scripts_tmpl,
+	"tmpl/style.tmpl":          tmpl_style_tmpl,
 }
 
 // AssetDir returns the file names below a certain
@@ -293,13 +314,14 @@ type _bintree_t struct {
 
 var _bintree = &_bintree_t{nil, map[string]*_bintree_t{
 	"tmpl": &_bintree_t{nil, map[string]*_bintree_t{
-		"base.tmpl":    &_bintree_t{tmpl_base_tmpl, map[string]*_bintree_t{}},
-		"index.tmpl":   &_bintree_t{tmpl_index_tmpl, map[string]*_bintree_t{}},
-		"links.tmpl":   &_bintree_t{tmpl_links_tmpl, map[string]*_bintree_t{}},
-		"login.tmpl":   &_bintree_t{tmpl_login_tmpl, map[string]*_bintree_t{}},
-		"prober.tmpl":  &_bintree_t{tmpl_prober_tmpl, map[string]*_bintree_t{}},
-		"scripts.tmpl": &_bintree_t{tmpl_scripts_tmpl, map[string]*_bintree_t{}},
-		"style.tmpl":   &_bintree_t{tmpl_style_tmpl, map[string]*_bintree_t{}},
+		"base.tmpl":           &_bintree_t{tmpl_base_tmpl, map[string]*_bintree_t{}},
+		"config_missing.tmpl": &_bintree_t{tmpl_config_missing_tmpl, map[string]*_bintree_t{}},
+		"index.tmpl":          &_bintree_t{tmpl_index_tmpl, map[string]*_bintree_t{}},
+		"links.tmpl":          &_bintree_t{tmpl_links_tmpl, map[string]*_bintree_t{}},
+		"login.tmpl":          &_bintree_t{tmpl_login_tmpl, map[string]*_bintree_t{}},
+		"prober.tmpl":         &_bintree_t{tmpl_prober_tmpl, map[string]*_bintree_t{}},
+		"scripts.tmpl":        &_bintree_t{tmpl_scripts_tmpl, map[string]*_bintree_t{}},
+		"style.tmpl":          &_bintree_t{tmpl_style_tmpl, map[string]*_bintree_t{}},
 	}},
 }}
 
