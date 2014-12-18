@@ -87,6 +87,7 @@ func Load(v interface{}, options ...option) error {
 	return nil
 }
 
+// option represents an option that can be set in the package.
 type option struct {
 	name, value string
 }
