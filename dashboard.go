@@ -9,7 +9,7 @@ import (
 
 var (
 	emailTemplate = `{{define "email"}}
-The probe <a href="http://fixme.com/#{{.Name}}">{{.Name}}</a> failed enough that this alert fired, as the arbitrary metric of 'badness' is {{.Badness}}, which we can all agree is a big number.<br/>
+The probe <a href="http://j.mp/hkjndash#{{.Name}}">{{.Name}}</a> failed enough that this alert fired, as the arbitrary metric of 'badness' is {{.Badness}}, which we can all agree is a big number.<br/>
 The description of the probe is: &ldquo;{{.Desc}}&rdquo;<br/>
 Failure details follow:<br/>
 {{range $r := .Records.RecentFailures}}
@@ -19,6 +19,8 @@ Failure details follow:<br/>
 {{end}}`
 	// Structure of config.yaml.
 	cfg = struct {
+		Live      bool
+		Version   string
 		Whitelist []string
 		Sendgrid  struct {
 			User, Password string
@@ -50,7 +52,14 @@ Failure details follow:<br/>
 	}{}
 )
 
+func Version() string { return cfg.Version }
+
+func Live() bool { return cfg.Live }
+
 func init() {
+	// TODO: accept missing config.yaml and register handler that checks
+	// for its presence, shows static error if still missing and
+	// otherwise loading it.
 	config.MustLoad(&cfg, config.Name("config.yaml"))
 	config.MustLoad(&probecfg, config.Name("probes.yaml"))
 
