@@ -15,11 +15,7 @@ var bindAddress = ":8080"
 
 func main() {
 	flag.Parse()
-	glog.Infof("gomon version %s initializing..\n", dashboard.Version())
-	glog.Infoln("Starting probes..")
-	for _, p := range dashboard.GetProbes() {
-		go p.Run()
-	}
+	glog.Infoln("gomon initializing..")
 	glog.Infof("Listening on %s..\n", bindAddress)
-	log.Fatal(http.ListenAndServe(bindAddress, dashboard.NewRouter()))
+	log.Fatal(http.ListenAndServe(bindAddress, dashboard.Start()))
 }

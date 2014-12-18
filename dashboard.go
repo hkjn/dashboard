@@ -2,6 +2,10 @@
 package dashboard // import "hkjn.me/dashboard"
 
 import (
+	"sync"
+
+	"github.com/golang/glog"
+	"github.com/gorilla/mux"
 	"hkjn.me/config"
 	"hkjn.me/googleauth"
 	"hkjn.me/probes"
@@ -17,21 +21,7 @@ Failure details follow:<br/>
   <p>{{$r.Details}}</p>
 {{end}}
 {{end}}`
-	// Structure of config.yaml.
-	cfg = struct {
-		Live      bool
-		Version   string
-		Whitelist []string
-		Sendgrid  struct {
-			User, Password string
-		}
-		Alerts struct {
-			Sender, Recipient string
-		}
-		Service struct {
-			Id, Secret string
-		}
-	}{}
+	cfg      = configT{}
 	probecfg = struct {
 		WebProbes []struct {
 			Target, Want, Name string
@@ -50,18 +40,43 @@ Failure details follow:<br/>
 			}
 		}
 	}{}
+	loadConfigOnce = sync.Once{}
 )
 
-func Version() string { return cfg.Version }
+// Structure of config.yaml.
+type configT struct {
+	loaded    bool
+	Live      bool
+	Version   string
+	Whitelist []string
+	Sendgrid  struct {
+		User, Password string
+	}
+	Alerts struct {
+		Sender, Recipient string
+	}
+	Service struct {
+		Id, Secret string
+	}
+}
 
-func Live() bool { return cfg.Live }
+func (c *configT) Loaded() bool {
+	return c.loaded
+}
 
-func init() {
-	// TODO: accept missing config.yaml and register handler that checks
-	// for its presence, shows static error if still missing and
-	// otherwise loading it.
-	config.MustLoad(&cfg, config.Name("config.yaml"))
-	config.MustLoad(&probecfg, config.Name("probes.yaml"))
+func (c *configT) Load() error {
+	err := config.Load(&cfg, config.Name("config.yaml"))
+	if err != nil {
+		return err
+	}
+	glog.Infoln("successfully loaded config")
+	c.loaded = true
+
+	glog.Infoln("Starting probes..")
+	// TODO: how to expose GetProbes to gomon?
+	for _, p := range GetProbes() {
+		go p.Run()
+	}
 
 	googleauth.SetCredentials(cfg.Service.Id, cfg.Service.Secret)
 	googleauth.SetGatingFunc(func(gplusId string) bool {
@@ -76,4 +91,23 @@ func init() {
 	probes.Config.Template = emailTemplate
 	probes.Config.Alert.Sender = cfg.Alerts.Sender
 	probes.Config.Alert.Recipient = cfg.Alerts.Recipient
+	return nil
+}
+
+func Version() string { return cfg.Version }
+
+func Live() bool { return cfg.Live }
+
+// Start returns the HTTP routes for the dashboard.
+//
+// If config.yaml is missing, the dashboard will remain inactive, but
+// we'll keep retrying to load it on every page request.
+func Start() *mux.Router {
+	config.MustLoad(&probecfg, config.Name("probes.yaml"))
+
+	err := cfg.Load()
+	if err != nil {
+		glog.Warningf("couldn't load config.yaml: %v\n", err)
+	}
+	return newRouter()
 }

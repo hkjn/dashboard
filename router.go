@@ -4,10 +4,11 @@ import (
 	"flag"
 	"html/template"
 	"net/http"
-	"sync"
+	"os"
 
 	// Generated with `go-bindata -pkg="bindata" -o bindata/bin.go tmpl/`
 	// from the base directory.
+
 	"hkjn.me/dashboard/bindata"
 	"hkjn.me/googleauth"
 
@@ -16,21 +17,27 @@ import (
 )
 
 var (
-	authDisabled   = flag.Bool("no_auth", false, "disables authentication (use for testing only)")
-	parseFlagsOnce = sync.Once{}
-	indexTmpls     = []string{
+	authDisabled = flag.Bool("no_auth", false, "disables authentication (use for testing only)")
+	baseTmpls    = []string{
 		"tmpl/base.tmpl",
 		"tmpl/scripts.tmpl",
 		"tmpl/style.tmpl",
+	}
+	indexTmpls = append(
+		baseTmpls,
 		"tmpl/index.tmpl",
 		"tmpl/links.tmpl",
 		"tmpl/prober.tmpl",
-	}
+	)
+	configMissingTmpl = getTemplate(append(
+		baseTmpls,
+		"tmpl/config_missing.tmpl",
+	))
 	baseTemplate = "base"
 )
 
-// NewRouter returns a new router for the endpoints of the dashboard.
-func NewRouter() *mux.Router {
+// newRouter returns a new router for the endpoints of the dashboard.
+func newRouter() *mux.Router {
 	routes := []route{
 		newPage("/", indexTmpls, getIndexData),
 		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
@@ -45,6 +52,28 @@ func NewRouter() *mux.Router {
 			HandlerFunc(r.HandlerFunc())
 	}
 	return router
+}
+
+// getTemplate returns the template loaded from the paths.
+//
+// getTemplate uses the bindata package on live, and otherwise parses
+// the .tmpl files from disk.
+func getTemplate(tmpls []string) *template.Template {
+	if Live() {
+		assets := []byte{}
+		for _, t := range tmpls {
+			b, err := bindata.Asset(t)
+			if err != nil {
+				glog.Fatalf("can't load asset %q: %v\n", t, err)
+			}
+			assets = append(assets, b...)
+		}
+		return template.Must(template.New(baseTemplate).Parse(string(assets)))
+	}
+	// TODO: automatically rebuild bindata (and gofmt -w it, since it
+	// isn't competent enough to do that..) in deploy.sh.
+	// Read from local disk on dev.
+	return template.Must(template.ParseFiles(tmpls...))
 }
 
 // serveISE serves an internal server error to the user.
@@ -83,26 +112,9 @@ type page struct {
 
 // newPage returns a new page.
 func newPage(pattern string, tmpls []string, getData getDataFn) *page {
-	getTemplate := func() *template.Template {
-		if Live() {
-			assets := []byte{}
-			for _, t := range tmpls {
-				b, err := bindata.Asset(t)
-				if err != nil {
-					glog.Fatalf("can't load asset %q: %v\n", t, err)
-				}
-				assets = append(assets, b...)
-			}
-			return template.Must(template.New(baseTemplate).Parse(string(assets)))
-		}
-		// TODO: automatically rebuild bindata (and gofmt -w it, since it
-		// isn't competent enough to do that..) in deploy.sh.
-		// Read from local disk on dev.
-		return template.Must(template.ParseFiles(tmpls...))
-	}
 	return &page{
 		pattern,
-		getTemplate(),
+		getTemplate(tmpls),
 		getData,
 	}
 }
@@ -129,15 +141,44 @@ func (p page) HandlerFunc() http.HandlerFunc {
 		}
 	}
 
-	parseFlagsOnce.Do(func() {
-		if !flag.Parsed() {
-			flag.Parse()
-		}
-	})
+	if !flag.Parsed() {
+		flag.Parse()
+	}
 	if *authDisabled {
 		glog.Infof("-disabled_auth is set, not checking credentials\n")
 	} else {
 		fn = googleauth.RequireLogin(fn)
 	}
-	return fn
+	return checkConfig(fn)
+}
+
+// checkConfig returns a wrapped HandlerFunc that attempts to load
+// config.yaml if it hasn't been loaded, and calls the specified
+// HandlerFunc only if there is a config.
+func checkConfig(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cfg.Loaded() {
+			glog.V(1).Infoln("already have config")
+			fn(w, r)
+			return
+		}
+		err := cfg.Load()
+		if err != nil {
+			if os.IsNotExist(err) {
+				glog.V(1).Infof("no config: %v\n", err)
+				err = configMissingTmpl.ExecuteTemplate(w, baseTemplate, "")
+				if err != nil {
+					glog.Errorf("failed to execute 'no config' template: %v\n", err)
+					http.Error(w, "Internal server error.", http.StatusInternalServerError)
+					return
+				}
+			} else {
+				glog.Errorf("bad config: %v\n", err)
+				http.Error(w, "Internal server error.", http.StatusInternalServerError)
+			}
+			return
+		}
+		glog.V(1).Infoln("config loaded successfully, onward to original handler func")
+		fn(w, r)
+	}
 }
