@@ -9,7 +9,7 @@
 		},
 		{
 			"ImportPath": "github.com/golang/glog",
-			"Rev": "d1c4472bf2efd3826f2b5bdcc02d8416798d678c"
+			"Rev": "44145f04b68cf362d9c4df2182967c2275eaefed"
 		},
 		{
 			"ImportPath": "github.com/gorilla/context",
@@ -29,13 +29,13 @@
 		},
 		{
 			"ImportPath": "github.com/sendgrid/sendgrid-go",
-			"Comment": "v1.0.0-6-g63195ba",
-			"Rev": "63195ba65f3627d7443f98d579093dcb69b88370"
+			"Comment": "v1.1.0",
+			"Rev": "f099d401da3cad312bb015d7aa7d77ec0e3c1aeb"
 		},
 		{
 			"ImportPath": "github.com/sendgrid/smtpapi-go",
-			"Comment": "v0.2.1-5-g2ba4c2f",
-			"Rev": "2ba4c2fbe4c9b0bb6d129d9a0f6f9c93a786d20e"
+			"Comment": "v0.2.1-7-gf898c6a",
+			"Rev": "f898c6a004fb8d48ef1ef3d0e64917c0522ead1c"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
