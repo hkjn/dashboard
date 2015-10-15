@@ -5,7 +5,7 @@ webprobes:
     want: /index
     wantstatus: 302
   - target: https://hkjn.me/index
-    name: NakedIndexRedirect
+    name: NakedIndex
     want: I like efficiency
     wantstatus: 200
   - target: https://www.hkjn.me
@@ -13,8 +13,8 @@ webprobes:
     want: /index
     wantstatus: 302
   - target: https://www.hkjn.me/index
-    name: I like efficiency
-    want: /index
+    name: WebIndex
+    want: I like efficiency
     wantstatus: 302
   - target: https://hkjn.me/dashboard
     name: GolangPackageDocs
