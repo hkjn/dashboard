@@ -25,6 +25,7 @@ Failure details follow:<br/>
 	probecfg = struct {
 		WebProbes []struct {
 			Target, Want, Name string
+			WantStatus         int
 		}
 		DnsProbe struct {
 			Target  string

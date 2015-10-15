@@ -3,7 +3,6 @@ package dashboard
 import (
 	"flag"
 	"net"
-	"net/http"
 	"sync"
 
 	"github.com/golang/glog"
@@ -23,7 +22,12 @@ func getWebProbes() []*prober.Probe {
 	probes := []*prober.Probe{}
 	for _, p := range probecfg.WebProbes {
 		probes = append(probes,
-			webprobe.New(p.Target, "GET", http.StatusOK, webprobe.Name(p.Name), webprobe.InResponse(p.Want)))
+			webprobe.New(
+				p.Target,
+				"GET",
+				p.WantStatus,
+				webprobe.Name(p.Name),
+				webprobe.InResponse(p.Want)))
 	}
 	return probes
 }
