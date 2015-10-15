@@ -12,9 +12,6 @@ webprobes:
   - target: http://www.hkjn.me
     name: WebIndex
     want: I like efficiency
-  - target: http://blog.hkjn.me
-    name: BlogIndex
-    want: Posts from all years
   - target: http://www.hkjn.me/where
     name: WhereAPI
     want: me@hkjn.me was last seen
