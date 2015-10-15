@@ -1,18 +1,18 @@
 # Web probe settings.
 webprobes:
-  - target: http://hkjn.me
+  - target: https://hkjn.me
     name: NakedIndex
     want: I like efficiency
-  - target: http://hkjn.me/dashboard
+  - target: https://hkjn.me/dashboard
     name: GolangPackageDocs
     want: https://godoc.org/hkjn.me/dashboard
-  - target: http://hkjn.me/dashboard?go-get=1
+  - target: https://hkjn.me/dashboard?go-get=1
     name: GolangPackageImport
     want: <meta name="go-import" content="hkjn.me/dashboard git https://github.com/hkjn/dashboard">
-  - target: http://www.hkjn.me
+  - target: https://www.hkjn.me
     name: WebIndex
     want: I like efficiency
-  - target: http://www.hkjn.me/where
+  - target: https://www.hkjn.me/where
     name: WhereAPI
     want: me@hkjn.me was last seen
 # DNS probe settings.
