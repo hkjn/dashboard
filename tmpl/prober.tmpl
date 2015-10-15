@@ -26,12 +26,12 @@
 <br class="fixfloat" />
 {{with $p.Records.RecentFailures}}
 <h3>Recent {{$p.Name}} failures</h3>
-  {{range $i, $r := .}}
-  <div class="probe_failure">
-  	<h3>{{$r.Timestamp}} ({{$r.Ago}})</h3>
-  	<p>{{$r.Details}}</p>
-  </div>
-  {{end}}
+	{{range $i, $r := .}}
+	<div class="probe_failure">
+		<h3>{{$r.Timestamp}} ({{$r.Ago}})</h3>
+		<p>{{$r.Result.Info}}</p>
+	</div>
+	{{end}}
 {{end}}
 {{end}}
 {{end}}
