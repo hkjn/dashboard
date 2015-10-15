@@ -18,7 +18,7 @@ The description of the probe is: &ldquo;{{.Desc}}&rdquo;<br/>
 Failure details follow:<br/>
 {{range $r := .Records.RecentFailures}}
   <h2>{{$r.Timestamp}} ({{$r.Ago}})</h2>
-  <p>{{$r.Details}}</p>
+  <p>{{$r.Result.Info}}</p>
 {{end}}
 {{end}}`
 	cfg      = configT{}
