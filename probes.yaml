@@ -26,21 +26,18 @@ dnsprobe:
     a:
       - 216.239.32.21
     mx:
-      - host: ASPMX.L.GOOGLE.COM.
+      - host: aspmx.l.google.com.
         pref: 1
-      - host: ALT1.ASPMX.L.GOOGLE.COM.
+      - host: alt1.aspmx.l.google.com.
         pref: 5
-      - host: ALT2.ASPMX.L.GOOGLE.COM.
+      - host: alt2.aspmx.l.google.com.
         pref: 5
-      - host: ASPMX2.GOOGLEMAIL.COM.
+      - host: aspmx2.googlemail.com.
         pref: 10
-      - host: ASPMX3.GOOGLEMAIL.COM.
+      - host: aspmx3.googlemail.com.
         pref: 10
     ns:
-      - dns1.registrar-servers.com.
-      - dns2.registrar-servers.com.
-      - dns3.registrar-servers.com.
-      - dns4.registrar-servers.com.
-      - dns5.registrar-servers.com.
-    txt:
-      - google-site-verification=wCxarQupvuu_sq38sAM8N4A3Cm5WgC8RDfmYDyNBndA
+      - ns-cloud-b1.googledomains.com.
+      - ns-cloud-b2.googledomains.com.
+      - ns-cloud-b3.googledomains.com.
+      - ns-cloud-b4.googledomains.com.
