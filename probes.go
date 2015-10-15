@@ -36,11 +36,14 @@ func getDnsProbe() *prober.Probe {
 	mxRecords := []*net.MX{}
 	r := probecfg.DnsProbe.Records
 	for _, mx := range r.Mx {
-		mxRecords = append(mxRecords, &net.MX{mx.Host, mx.Pref})
+		mxRecords = append(mxRecords, &net.MX{
+			Host: mx.Host,
+			Pref: mx.Pref,
+		})
 	}
 	nsRecords := []*net.NS{}
 	for _, ns := range r.Ns {
-		nsRecords = append(nsRecords, &net.NS{ns})
+		nsRecords = append(nsRecords, &net.NS{Host: ns})
 	}
 	return dnsprobe.New(
 		probecfg.DnsProbe.Target, dnsprobe.MX(mxRecords), dnsprobe.A(r.A),

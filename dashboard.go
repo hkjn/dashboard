@@ -75,7 +75,7 @@ func setGoogleAuthCfg(serviceID, serviceSecret string, allowedIDs []string) erro
 	if serviceID == "" {
 		return errors.New("no service ID")
 	}
-	glog.V(1).Infof("Our Google service ID is %q\n")
+	glog.V(1).Infof("Our Google service ID is %q\n", serviceID)
 	if serviceSecret == "" {
 		return errors.New("no service secret")
 	}
