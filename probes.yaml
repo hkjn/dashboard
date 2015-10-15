@@ -12,7 +12,7 @@ webprobes:
   - target: https://www.hkjn.me
     name: WebIndex
     want: I like efficiency
-  - target: https://www.hkjn.me/where
+  - target: https://hkjn.me/where
     name: WhereAPI
     want: me@hkjn.me was last seen
 # DNS probe settings.
