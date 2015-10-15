@@ -3,6 +3,7 @@ package dashboard
 import (
 	"flag"
 	"net"
+	"sort"
 	"sync"
 
 	"github.com/golang/glog"
@@ -14,12 +15,12 @@ import (
 
 var (
 	proberDisabled = flag.Bool("no_probes", false, "disables probes")
-	allProbes      = []*prober.Probe{}
+	allProbes      = prober.Probes{}
 	createOnce     = sync.Once{}
 )
 
-func getWebProbes() []*prober.Probe {
-	probes := []*prober.Probe{}
+func getWebProbes() prober.Probes {
+	probes := prober.Probes{}
 	for _, p := range probecfg.WebProbes {
 		probes = append(probes,
 			webprobe.New(
@@ -51,7 +52,7 @@ func getDnsProbe() *prober.Probe {
 }
 
 // getProbes returns all probes in the dashboard.
-func getProbes() []*prober.Probe {
+func getProbes() prober.Probes {
 	createOnce.Do(func() {
 		if !flag.Parsed() {
 			flag.Parse()
@@ -65,5 +66,6 @@ func getProbes() []*prober.Probe {
 			allProbes = append(allProbes, getWebProbes()...)
 		}
 	})
+	sort.Sort(allProbes)
 	return allProbes
 }
