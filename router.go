@@ -6,10 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	// Generated with `go-bindata -pkg="bindata" -o bindata/bin.go tmpl/`
-	// from the base directory.
-
-	"hkjn.me/dashboard/bindata"
 	"hkjn.me/googleauth"
 
 	"github.com/golang/glog"
@@ -58,28 +54,8 @@ func newRouter() *mux.Router {
 
 // getTemplate returns the template loaded from the paths.
 //
-// getTemplate uses the bindata package on live, and otherwise parses
-// the .tmpl files from disk.
+// getTemplate parses the .tmpl files from disk.
 func getTemplate(tmpls []string) *template.Template {
-	live := true
-	if cfg.loaded { // TODO: improve this hack.
-		live = cfg.Live
-	}
-	glog.Infof("we're live? %v\n", live)
-	if live {
-		assets := []byte{}
-		for _, t := range tmpls {
-			b, err := bindata.Asset(t)
-			if err != nil {
-				glog.Fatalf("can't load asset %q: %v\n", t, err)
-			}
-			assets = append(assets, b...)
-		}
-		return template.Must(template.New(baseTemplate).Parse(string(assets)))
-	}
-	// TODO: automatically rebuild bindata (and gofmt -w it, since it
-	// isn't competent enough to do that..) in deploy.sh.
-	// Read from local disk on dev.
 	return template.Must(template.ParseFiles(tmpls...))
 }
 
