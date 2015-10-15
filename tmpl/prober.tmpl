@@ -13,7 +13,7 @@
 <p>{{$p.Desc}}</p>
 <h3 {{with $p.Alerting}}class="bad"{{end}}>Badness: {{$p.Badness}}</h3>
 {{range $j, $r := $p.Records }}
-{{if $r.Passed}}
+{{if $r.Result.Passed}}
 <div class="probe_result good">
 	<strong title="{{$r.Timestamp}} ({{$r.Ago}})">✓</strong>
 </div>
