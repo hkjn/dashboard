@@ -2,6 +2,7 @@
 package dashboard // import "hkjn.me/dashboard"
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/golang/glog"
@@ -21,7 +22,6 @@ Failure details follow:<br/>
   <p>{{$r.Result.Info}}</p>
 {{end}}
 {{end}}`
-	cfg      = configT{}
 	probecfg = struct {
 		WebProbes []struct {
 			Target, Want, Name string
@@ -44,53 +44,54 @@ Failure details follow:<br/>
 	loadConfigOnce = sync.Once{}
 )
 
-// Structure of config.yaml.
-type configT struct {
-	loaded    bool
-	Live      bool
-	Version   string
-	Whitelist []string
-	Sendgrid  struct {
-		User, Password string
+func setProbesCfg(sgUser, sgPassword, emailSender, emailRecipient, emailTemplate string) error {
+	glog.V(1).Infof("Our sengrid.com user is %q\n", sgUser)
+	if sgUser == "" {
+		return errors.New("no sengrid user")
 	}
-	Alerts struct {
-		Sender, Recipient string
+	probes.Config.Sendgrid.User = sgUser
+	if sgPassword == "" {
+		return errors.New("no sengrid password")
 	}
-	Service struct {
-		Id, Secret string
+	probes.Config.Sendgrid.Password = sgPassword
+
+	if emailSender == "" {
+		return errors.New("no email sender")
 	}
+	glog.V(1).Infof("Sending any alert emails from %q to %q\n", emailSender, emailRecipient)
+	probes.Config.Alert.Sender = emailSender
+	if emailRecipient == "" {
+		return errors.New("no email recipient")
+	}
+	probes.Config.Alert.Recipient = emailRecipient
+	if emailTemplate == "" {
+		return errors.New("no email template")
+	}
+	probes.Config.Template = emailTemplate
+	return nil
 }
 
-func (c *configT) Loaded() bool {
-	return c.loaded
-}
-
-func (c *configT) Load() error {
-	err := config.Load(&cfg, config.Name("config.yaml"))
-	if err != nil {
-		return err
+func setGoogleAuthCfg(serviceID, serviceSecret string, allowedIDs []string) error {
+	if serviceID == "" {
+		return errors.New("no service ID")
 	}
-	glog.Infoln("successfully loaded config")
-	c.loaded = true
-
-	glog.Infoln("Starting probes..")
-	for _, p := range getProbes() {
-		go p.Run()
+	glog.V(1).Infof("Our Google service ID is %q\n")
+	if serviceSecret == "" {
+		return errors.New("no service secret")
 	}
-
-	googleauth.SetCredentials(cfg.Service.Id, cfg.Service.Secret)
-	googleauth.SetGatingFunc(func(gplusId string) bool {
-		for _, id := range cfg.Whitelist {
-			if gplusId == id {
+	googleauth.SetCredentials(serviceID, serviceSecret)
+	if len(allowedIDs) == 0 {
+		return errors.New("no allowed IDs")
+	}
+	glog.V(1).Infof("These Google+ IDs are allowed access: %q\n", allowedIDs)
+	googleauth.SetGatingFunc(func(id string) bool {
+		for _, aid := range allowedIDs {
+			if id == aid {
 				return true
 			}
 		}
 		return false
 	})
-	probes.Config.Sendgrid = cfg.Sendgrid
-	probes.Config.Template = emailTemplate
-	probes.Config.Alert.Sender = cfg.Alerts.Sender
-	probes.Config.Alert.Recipient = cfg.Alerts.Recipient
 	return nil
 }
 
@@ -98,12 +99,27 @@ func (c *configT) Load() error {
 //
 // If config.yaml is missing, the dashboard will remain inactive, but
 // we'll keep retrying to load it on every page request.
-func Start() *mux.Router {
+func Start(
+	googleServiceID,
+	googleSecret,
+	sgUser,
+	sgPassword,
+	emailSender,
+	emailRecipient string,
+	allowedGoogleIDs []string) *mux.Router {
 	config.MustLoad(&probecfg, config.Name("probes.yaml"))
 
-	err := cfg.Load()
-	if err != nil {
-		glog.Warningf("couldn't load config.yaml: %v\n", err)
+	ps := getProbes()
+	glog.Infof("Starting %d probes..\n", len(ps))
+	for _, p := range ps {
+		go p.Run()
+	}
+
+	if err := setProbesCfg(sgUser, sgPassword, emailSender, emailRecipient, emailTemplate); err != nil {
+		glog.Fatalf("FATAL: Couldn't set probes config: %v\n", err)
+	}
+	if err := setGoogleAuthCfg(googleServiceID, googleSecret, allowedGoogleIDs); err != nil {
+		glog.Fatalf("FATAL: Couldn't set googleauth config: %v\n", err)
 	}
 	return newRouter()
 }

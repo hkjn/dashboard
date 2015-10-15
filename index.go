@@ -16,7 +16,7 @@ func getIndexData(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 		Probes         []*prober.Probe
 		ProberDisabled bool
 	}{}
-	data.Version = cfg.Version
+	data.Version = "v0.02"
 	data.Probes = getProbes()
 	data.ProberDisabled = *proberDisabled
 	return data, nil

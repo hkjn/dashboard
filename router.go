@@ -4,7 +4,6 @@ import (
 	"flag"
 	"html/template"
 	"net/http"
-	"os"
 
 	"hkjn.me/googleauth"
 
@@ -132,36 +131,5 @@ func (p page) HandlerFunc() http.HandlerFunc {
 	} else {
 		fn = googleauth.RequireLogin(fn)
 	}
-	return checkConfig(fn)
-}
-
-// checkConfig returns a wrapped HandlerFunc that attempts to load
-// config.yaml if it hasn't been loaded, and calls the specified
-// HandlerFunc only if there is a config.
-func checkConfig(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if cfg.Loaded() {
-			glog.V(1).Infoln("already have config")
-			fn(w, r)
-			return
-		}
-		err := cfg.Load()
-		if err != nil {
-			if os.IsNotExist(err) {
-				glog.V(1).Infof("no config: %v\n", err)
-				err = configMissingTmpl.ExecuteTemplate(w, baseTemplate, "")
-				if err != nil {
-					glog.Errorf("failed to execute 'no config' template: %v\n", err)
-					http.Error(w, "Internal server error.", http.StatusInternalServerError)
-					return
-				}
-			} else {
-				glog.Errorf("bad config: %v\n", err)
-				http.Error(w, "Internal server error.", http.StatusInternalServerError)
-			}
-			return
-		}
-		glog.V(1).Infoln("config loaded successfully, onward to original handler func")
-		fn(w, r)
-	}
+	return fn
 }

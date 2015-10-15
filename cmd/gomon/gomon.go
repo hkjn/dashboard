@@ -3,10 +3,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/golang/glog"
+	"os"
+	"strings"
 
 	"hkjn.me/dashboard"
 )
@@ -15,7 +16,16 @@ var bindAddress = ":8080"
 
 func main() {
 	flag.Parse()
-	glog.Infoln("gomon initializing..")
-	glog.Infof("Listening on %s..\n", bindAddress)
-	log.Fatal(http.ListenAndServe(bindAddress, dashboard.Start()))
+	fmt.Printf("gomon initializing, listening on %s..\n", bindAddress)
+
+	allowedGoogleIDs := strings.Split(os.Getenv("ALLOWED_GOOGLE_IDS"), ",")
+	log.Fatal(http.ListenAndServe(bindAddress, dashboard.Start(
+		os.Getenv("GOOGLE_SERVICE_ID"),
+		os.Getenv("GOOGLE_SECRET"),
+		os.Getenv("SENDGRID_USER"),
+		os.Getenv("SENDGRID_PASSWORD"),
+		os.Getenv("EMAIL_SENDER"),
+		os.Getenv("EMAIL_RECIPIENT"),
+		allowedGoogleIDs,
+	)))
 }
