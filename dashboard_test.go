@@ -8,20 +8,32 @@ import (
 	"testing"
 )
 
+// These tests are broken; repair and set up CI, maybe CD.
 func TestStart(t *testing.T) {
 	cases := []struct {
 		method         string
 		pattern        string
 		wantCode       int
 		wantInResponse string
-		auth           bool
+		debug          bool
 	}{
-		{"GET", "/", 200, "g-signin", true},
-		{"GET", "/", 200, "WebProber", false},
+		{
+			method:         "GET",
+			pattern:        "/",
+			wantCode:       200,
+			wantInResponse: "g-signin",
+			debug:          false,
+		},
+		{
+			method:         "GET",
+			pattern:        "/",
+			wantCode:       200,
+			wantInResponse: "DnsProber",
+			debug:          true,
+		},
 	}
 	for i, tt := range cases {
-		*authDisabled = !tt.auth
-		router := Start()
+		router := newRouter(tt.debug)
 
 		req, err := http.NewRequest(tt.method, tt.pattern, nil)
 		if err != nil {
