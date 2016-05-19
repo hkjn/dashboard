@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	baseTmpls = []string{
+	authDisabled = false
+	baseTmpls    = []string{
 		"tmpl/base.tmpl",
 		"tmpl/scripts.tmpl",
 		"tmpl/style.tmpl",
@@ -32,10 +33,13 @@ var (
 // newRouter returns a new router for the endpoints of the dashboard.
 //
 // newRouter panics if the config wasn't loaded.
-func newRouter() *mux.Router {
+func newRouter(debug bool) *mux.Router {
 	routes := []route{
 		newPage("/", indexTmpls, getIndexData),
 		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
+	}
+	if debug {
+		authDisabled = true // TODO(hkjn): Avoid global variable.
 	}
 
 	router := mux.NewRouter().StrictSlash(true)

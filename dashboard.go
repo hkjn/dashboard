@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	authDisabled  = false
 	emailTemplate = `{{define "email"}}
 The probe <a href="http://j.mp/hkjndash#{{.Name}}">{{.Name}}</a> failed enough that this alert fired, as the arbitrary metric of 'badness' is {{.Badness}}, which we can all agree is a big number.<br/>
 The description of the probe is: &ldquo;{{.Desc}}&rdquo;<br/>
@@ -61,7 +60,6 @@ type Config struct {
 func setProbesCfg(conf Config, emailTemplate string) error {
 	if conf.Debug {
 		glog.Infoln("Starting in debug mode (no auth)..")
-		authDisabled = true // TODO(hkjn): Avoid global variable.
 		return nil
 	}
 	glog.V(1).Infof("Our sendgrid.com user is %q\n", conf.SendgridUser)
@@ -129,5 +127,5 @@ func Start(conf Config) *mux.Router {
 	if err := setProbesCfg(conf, emailTemplate); err != nil {
 		glog.Fatalf("FATAL: Couldn't set probes config: %v\n", err)
 	}
-	return newRouter()
+	return newRouter(conf.Debug)
 }
