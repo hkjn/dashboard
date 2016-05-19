@@ -45,13 +45,13 @@ Failure details follow:<br/>
 )
 
 func setProbesCfg(sgUser, sgPassword, emailSender, emailRecipient, emailTemplate string) error {
-	glog.V(1).Infof("Our sengrid.com user is %q\n", sgUser)
+	glog.V(1).Infof("Our sendgrid.com user is %q\n", sgUser)
 	if sgUser == "" {
-		return errors.New("no sengrid user")
+		return errors.New("no sendgrid user")
 	}
 	probes.Config.Sendgrid.User = sgUser
 	if sgPassword == "" {
-		return errors.New("no sengrid password")
+		return errors.New("no sendgrid password")
 	}
 	probes.Config.Sendgrid.Password = sgPassword
 
