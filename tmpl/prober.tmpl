@@ -11,7 +11,7 @@
 <p class="bad">Disabled</p>
 {{else}}
 <p>{{$p.Desc}}</p>
-<h3 {{with $p.Alerting}}class="bad"{{end}}>Badness: {{$p.Badness}}</h3>
+<h3 {{with $p.IsAlerting}}class="bad"{{end}}>Badness: {{$p.Badness}}</h3>
 {{range $j, $r := $p.Records }}
 {{if $r.Result.Passed}}
 <div class="probe_result good">
