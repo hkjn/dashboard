@@ -6,26 +6,26 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 
+	"github.com/kelseyhightower/envconfig"
 	"hkjn.me/dashboard"
 )
 
-var bindAddress = ":8080"
-
 func main() {
 	flag.Parse()
-	fmt.Printf("gomon initializing, listening on %s..\n", bindAddress)
+	var conf dashboard.Config
+	err := envconfig.Process("dashboard", &conf)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	if conf.BindAddr == "" {
+		conf.BindAddr = ":8080"
+	}
+	fmt.Printf("gomon initializing, listening on %s..\n", conf.BindAddr)
 
-	allowedGoogleIDs := strings.Split(os.Getenv("ALLOWED_GOOGLE_IDS"), ",")
-	log.Fatal(http.ListenAndServe(bindAddress, dashboard.Start(
-		os.Getenv("GOOGLE_SERVICE_ID"),
-		os.Getenv("GOOGLE_SECRET"),
-		os.Getenv("SENDGRID_USER"),
-		os.Getenv("SENDGRID_PASSWORD"),
-		os.Getenv("EMAIL_SENDER"),
-		os.Getenv("EMAIL_RECIPIENT"),
-		allowedGoogleIDs,
-	)))
+	err = http.ListenAndServe(
+		conf.BindAddr,
+		dashboard.Start(conf),
+	)
+	log.Fatal(err.Error())
 }

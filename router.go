@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"flag"
 	"html/template"
 	"net/http"
 
@@ -12,8 +11,7 @@ import (
 )
 
 var (
-	authDisabled = flag.Bool("no_auth", false, "disables authentication (use for testing only)")
-	baseTmpls    = []string{
+	baseTmpls = []string{
 		"tmpl/base.tmpl",
 		"tmpl/scripts.tmpl",
 		"tmpl/style.tmpl",
@@ -123,11 +121,8 @@ func (p page) HandlerFunc() http.HandlerFunc {
 		}
 	}
 
-	if !flag.Parsed() {
-		flag.Parse()
-	}
-	if *authDisabled {
-		glog.Infof("-disabled_auth is set, not checking credentials\n")
+	if authDisabled {
+		glog.V(1).Infof("Auth is disabled is set, not checking credentials\n")
 	} else {
 		fn = googleauth.RequireLogin(fn)
 	}
