@@ -24,6 +24,10 @@ webprobes:
     name: GolangPackageImport
     want: <meta name="go-import" content="hkjn.me/dashboard git https://github.com/hkjn/dashboard">
     wantstatus: 200
+  - target: https://hkjn.me/probes/webprobe?go-get=1
+    name: GolangSubPackageImport
+    want: <meta name="go-import" content="hkjn.me/probes git https://github.com/hkjn/probes">
+    wantstatus: 200
   - target: https://hkjn.me/where
     name: WhereAPIRedirect
     want: http://computare0.appspot.com/where/me@hkjn.me
