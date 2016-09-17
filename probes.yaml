@@ -42,7 +42,7 @@ dnsprobe:
   records:
     cname: hkjn.me.
     a:
-      - 212.47.230.58
+      - 163.172.173.208
     mx:
       - host: aspmx.l.google.com.
         pref: 1
