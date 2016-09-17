@@ -40,7 +40,6 @@ webprobes:
 dnsprobe:
   target: hkjn.me
   records:
-    cname: hkjn.me.
     a:
       - 163.172.173.208
     mx:
