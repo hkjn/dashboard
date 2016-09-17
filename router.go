@@ -23,10 +23,6 @@ var (
 		"tmpl/links.tmpl",
 		"tmpl/prober.tmpl",
 	)
-	configMissingTmpl = getTemplate(append(
-		baseTmpls,
-		"tmpl/config_missing.tmpl",
-	))
 	baseTemplate = "base"
 )
 
