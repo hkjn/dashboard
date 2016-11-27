@@ -1,11 +1,15 @@
-FROM golang
+FROM hkjn/golang
 
-WORKDIR /go/src/hkjn.me/dashboard
+WORKDIR /home/go/src/hkjn.me/dashboard
 COPY *.go ./
 COPY cmd/ ./cmd/
-RUN go get hkjn.me/dashboard/cmd/gomon
+COPY tmpl/ ./tmpl/
+RUN go get ./... && \
+    go test && \
+    go vet && \
+    go install hkjn.me/dashboard/cmd/gomon
 
-WORKDIR /go/bin
+WORKDIR /home/go/bin
 COPY *.yaml ./
 COPY tmpl/ ./tmpl/
 
