@@ -54,7 +54,7 @@ dnsprobe:
       - host: aspmx3.googlemail.com.
         pref: 10
     ns:
-      - ns-cloud-b1.googledomains.com.
-      - ns-cloud-b2.googledomains.com.
-      - ns-cloud-b3.googledomains.com.
-      - ns-cloud-b4.googledomains.com.
+      - ns-cloud-c1.googledomains.com.
+      - ns-cloud-c2.googledomains.com.
+      - ns-cloud-c3.googledomains.com.
+      - ns-cloud-c4.googledomains.com.
