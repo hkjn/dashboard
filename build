@@ -7,7 +7,7 @@ DOCKER_IMAGE="dashboard"
 ARCH="$(uname -m)"
 BUILD_DIR="$(mktemp -d)"
 
-cp -vr Dockerfile *.go cmd tmpl "$BUILD_DIR/"
+cp -vr Dockerfile *.go *.yaml cmd tmpl "$BUILD_DIR/"
 [[ $ARCH = "x86_64" ]] || {
   sed -i "s/FROM hkjn\//FROM hkjn\/$ARCH-/" "$BUILD_DIR/Dockerfile"
   DOCKER_IMAGE="$ARCH-$DOCKER_IMAGE"
