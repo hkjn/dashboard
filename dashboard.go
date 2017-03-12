@@ -56,7 +56,6 @@ type Config struct {
 	EmailRecipient   string
 }
 
-// FIXMEH: blah
 // setProbeCfg sets the config values.
 func setProbesCfg(conf Config, emailTemplate string) error {
 	if conf.Debug {
