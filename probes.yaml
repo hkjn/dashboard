@@ -24,6 +24,9 @@ webprobes:
     name: CitiesIndex
     want: dream city
     wantstatus: 200
+  - target: https://cities.hkjn.me/doesnotexist
+    name: Cities404
+    wantstatus: 404
   - target: https://hkjn.me/dashboard?go-get=1
     name: GolangPackageImport
     want: <meta name="go-import" content="hkjn.me/dashboard git https://github.com/hkjn/dashboard">
