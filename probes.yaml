@@ -24,6 +24,18 @@ webprobes:
     name: CitiesIndex
     want: dream city
     wantstatus: 200
+  - target: https://cities.hkjn.me/by-cost
+    name: CitiesIndex
+    want: sorted cities by cost
+    wantstatus: 200
+  - target: https://cities.hkjn.me/by-climate
+    name: CitiesIndex
+    want: sorted cities by climate
+    wantstatus: 200
+  - target: https://cities.hkjn.me/by-population
+    name: CitiesIndex
+    want: sorted cities by population
+    wantstatus: 200
   - target: https://cities.hkjn.me/doesnotexist
     name: Cities404
     wantstatus: 404
