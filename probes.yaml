@@ -24,6 +24,10 @@ webprobes:
     name: CitiesIndex
     want: dream city
     wantstatus: 200
+  - target: http://www.sultanyoga.com
+    name: YogaIndex
+    want: I am Aruna Elentari
+    wantstatus: 200
   - target: https://cities.hkjn.me/by-cost
     name: CitiesIndex
     want: sorted cities by cost
@@ -56,24 +60,47 @@ webprobes:
     want: me@hkjn.me was last seen
     wantstatus: 200
 # DNS probe settings.
-dnsprobe:
-  target: hkjn.me
-  records:
-    a:
-      - 163.172.173.208
-    mx:
-      - host: aspmx.l.google.com.
-        pref: 1
-      - host: alt1.aspmx.l.google.com.
-        pref: 5
-      - host: alt2.aspmx.l.google.com.
-        pref: 5
-      - host: aspmx2.googlemail.com.
-        pref: 10
-      - host: aspmx3.googlemail.com.
-        pref: 10
-    ns:
-      - ns-cloud-c1.googledomains.com.
-      - ns-cloud-c2.googledomains.com.
-      - ns-cloud-c3.googledomains.com.
-      - ns-cloud-c4.googledomains.com.
+dnsprobes:
+  - target: hkjn.me
+    records:
+      a:
+        - 163.172.173.208
+      mx:
+        - host: aspmx.l.google.com.
+          pref: 1
+        - host: alt1.aspmx.l.google.com.
+          pref: 5
+        - host: alt2.aspmx.l.google.com.
+          pref: 5
+        - host: aspmx2.googlemail.com.
+          pref: 10
+        - host: aspmx3.googlemail.com.
+          pref: 10
+      ns:
+        - ns-cloud-c1.googledomains.com.
+        - ns-cloud-c2.googledomains.com.
+        - ns-cloud-c3.googledomains.com.
+        - ns-cloud-c4.googledomains.com.
+  - target: sultanyoga.com
+    records:
+      mx:
+        - host: aspmx.l.google.com.
+          pref: 10
+        - host: alt1.aspmx.l.google.com.
+          pref: 20
+        - host: alt2.aspmx.l.google.com.
+          pref: 20
+        - host: aspmx4.googlemail.com.
+          pref: 30
+        - host: aspmx5.googlemail.com.
+          pref: 30
+        - host: aspmx2.googlemail.com.
+          pref: 30
+        - host: aspmx3.googlemail.com.
+          pref: 30
+      ns:
+        - dns4.name-services.com.
+        - dns1.name-services.com.
+        - dns2.name-services.com.
+        - dns3.name-services.com.
+        - dns5.name-services.com.
