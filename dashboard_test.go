@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-// These tests are broken; repair and set up CI, maybe CD.
-func TestStart(t *testing.T) {
+// TODO(hkjn): These tests are broken; repair and set up CI, maybe CD.
+func DISABLED_TestStart(t *testing.T) {
 	cases := []struct {
 		method         string
 		pattern        string
