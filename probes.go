@@ -33,22 +33,27 @@ func getWebProbes() prober.Probes {
 	return probes
 }
 
-func getDnsProbe() *prober.Probe {
-	mxRecords := []*net.MX{}
-	r := probecfg.DnsProbe.Records
-	for _, mx := range r.Mx {
-		mxRecords = append(mxRecords, &net.MX{
-			Host: mx.Host,
-			Pref: mx.Pref,
-		})
+func getDnsProbes() prober.Probes {
+	probes := prober.Probes{}
+	for _, p := range probecfg.DnsProbes {
+		mxRecords := []*net.MX{}
+		for _, mx := range p.Records.Mx {
+			mxRecords = append(mxRecords, &net.MX{
+				Host: mx.Host,
+				Pref: mx.Pref,
+			})
+		}
+		nsRecords := []*net.NS{}
+		for _, ns := range p.Records.Ns {
+			nsRecords = append(nsRecords, &net.NS{Host: ns})
+		}
+		probes = append(
+			probes,
+			dnsprobe.New(
+				p.Target, dnsprobe.MX(mxRecords), dnsprobe.A(p.Records.A),
+				dnsprobe.NS(nsRecords), dnsprobe.CNAME(p.Records.Cname), dnsprobe.TXT(p.Records.Txt)))
 	}
-	nsRecords := []*net.NS{}
-	for _, ns := range r.Ns {
-		nsRecords = append(nsRecords, &net.NS{Host: ns})
-	}
-	return dnsprobe.New(
-		probecfg.DnsProbe.Target, dnsprobe.MX(mxRecords), dnsprobe.A(r.A),
-		dnsprobe.NS(nsRecords), dnsprobe.CNAME(r.Cname), dnsprobe.TXT(r.Txt))
+	return probes
 }
 
 // getProbes returns all probes in the dashboard.
@@ -60,10 +65,7 @@ func getProbes() prober.Probes {
 		if *proberDisabled {
 			glog.Infof("Probes are disabled with -no_probes\n")
 		} else {
-			allProbes = []*prober.Probe{
-				getDnsProbe(),
-			}
-			allProbes = append(allProbes, getWebProbes()...)
+			allProbes = append(getDnsProbes(), getWebProbes()...)
 		}
 	})
 	sort.Sort(allProbes)

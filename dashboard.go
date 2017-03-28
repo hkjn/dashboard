@@ -27,7 +27,7 @@ Failure details follow:<br/>
 			Target, Want, Name string
 			WantStatus         int
 		}
-		DnsProbe struct {
+		DnsProbes []struct {
 			Target  string
 			Records struct {
 				Cname string
