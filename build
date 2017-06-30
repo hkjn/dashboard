@@ -5,15 +5,18 @@ DOCKER_USER="hkjn"
 DOCKER_IMAGE="dashboard"
 
 ARCH="$(uname -m)"
+
+declare -A BASEIMAGES
+BASEIMAGES[x86_64]=hkjn/golang:x86_64
+BASEIMAGES[armv7l]=hkjn/golang:armv7l
+
+BASEIMAGE=${BASEIMAGES[$ARCH]}
 BUILD_DIR="$(mktemp -d)"
+TAG="$DOCKER_USER/$DOCKER_IMAGE:$ARCH"
 
-cp -r Dockerfile *.go *.yaml cmd tmpl vendor "$BUILD_DIR/"
-[[ $ARCH = "x86_64" ]] || {
-  sed -i "s/FROM hkjn\//FROM hkjn\/$ARCH-/" "$BUILD_DIR/Dockerfile"
-  DOCKER_IMAGE="$ARCH-$DOCKER_IMAGE"
-}
+sed "s|ARG_FROM|${BASEIMAGE}|g" Dockerfile.in > $BUILD_DIR/Dockerfile
+cp -r *.go *.yaml cmd tmpl vendor "$BUILD_DIR/"
 
-TAG="$DOCKER_USER/$DOCKER_IMAGE"
 echo "Building $TAG in '$BUILD_DIR'.."
 docker build -t $TAG "$BUILD_DIR/"
 NO_PUSH=${NO_PUSH:-""}

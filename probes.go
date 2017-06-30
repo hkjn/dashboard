@@ -13,6 +13,7 @@ import (
 	"hkjn.me/probes/webprobe"
 )
 
+// TODO(hkjn): Add support for sending POST requests in webprobe.
 var (
 	proberDisabled = flag.Bool("no_probes", false, "disables probes")
 	allProbes      = prober.Probes{}
