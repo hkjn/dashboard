@@ -3,3 +3,4 @@ overrides.yaml
 .#*
 *~
 /gomon
+.*.sw?
