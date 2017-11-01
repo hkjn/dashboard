@@ -1,4 +1,4 @@
-FROM ARG_FROM
+FROM hkjn/golang
 
 WORKDIR /home/go/src/hkjn.me/dashboard
 
