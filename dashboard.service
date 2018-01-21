@@ -13,7 +13,10 @@ After=network-online.target
 [Service]
 ExecStartPre=-/usr/bin/docker stop mon
 ExecStartPre=-/usr/bin/docker rm mon
-ExecStart=/usr/bin/docker run --rm --name mon -p 80:8080 --env-file=/etc/dashboard/env.asc hkjn/armv7l-dashboard
+ExecStart=/bin/bash -c " \
+  docker run --rm --name mon -p 80:8080 \
+             --env-file=/etc/dashboard/env.asc \
+             hkjn/dashboard:$(uname -m)"
 Restart=always
 
 [Install]
