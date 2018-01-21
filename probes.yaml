@@ -24,6 +24,10 @@ webprobes:
     name: DecenterIndex
     want: IrSn3zx2GbM
     wantstatus: 200
+  - target: http://blockpress.me
+    name: BlockpressIndex
+    want: 
+    wantstatus: 200
   - target: https://cities.hkjn.me
     name: CitiesIndex
     want: dream city
