@@ -8,8 +8,8 @@ import (
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"hkjn.me/config"
-	"hkjn.me/googleauth"
 	"hkjn.me/probes"
+	"hkjn.me/src/googleauth"
 )
 
 var (

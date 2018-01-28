@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"hkjn.me/googleauth"
+	"hkjn.me/src/googleauth"
 
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
