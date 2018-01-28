@@ -26,11 +26,12 @@ webprobes:
     wantstatus: 200
   - target: http://ln.hkjn.me/debug/vars
     name: LightningdRunning
-    want: "lightningd.running": 1
+    want: lightningd.running
     wantstatus: 200
   - target: http://ln.hkjn.me/debug/vars
     name: BitcoindRunning
-    want: "bitcoind.running": 1
+    want: bitcoind.running
+    wantstatus: 200
   - target: http://blockpress.me
     name: BlockpressIndex
     want: 
