@@ -31,6 +31,9 @@ webprobes:
   - target: http://ln.hkjn.me/debug/vars
     name: BitcoindRunning
     want: "bitcoind.running": 1
+  - target: http://blockpress.me
+    name: BlockpressIndex
+    want: 
     wantstatus: 200
   - target: https://cities.hkjn.me
     name: CitiesIndex
