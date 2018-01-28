@@ -7,8 +7,8 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
-	"hkjn.me/config"
 	"hkjn.me/probes"
+	"hkjn.me/src/config"
 	"hkjn.me/src/googleauth"
 )
 
