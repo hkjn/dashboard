@@ -2,131 +2,126 @@
 package sendgrid
 
 import (
-	"fmt"
-	"io/ioutil"
+	"errors"
 	"net/http"
-	"net/url"
-	"strings"
+	"strconv"
 	"time"
+
+	"github.com/sendgrid/rest" // depends on version 2.2.0
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-const Version = "2.0.0"
+// Version is this client library's current version
+const (
+	Version        = "3.1.0"
+	rateLimitRetry = 5
+	rateLimitSleep = 1100
+)
 
-// SGClient will contain the credentials and default values
-type SGClient struct {
-	apiUser string
-	apiPwd  string
-	APIMail string
-	Client  *http.Client
+// Client is the SendGrid Go client
+type Client struct {
+	// rest.Request
+	rest.Request
 }
 
-// NewSendGridClient will return a new SGClient. Used for username and password
-func NewSendGridClient(apiUser, apiKey string) *SGClient {
-	apiMail := "https://api.sendgrid.com/api/mail.send.json?"
-
-	Client := &SGClient{
-		apiUser: apiUser,
-		apiPwd:  apiKey,
-		APIMail: apiMail,
+// GetRequest returns a default request object.
+func GetRequest(key string, endpoint string, host string) rest.Request {
+	if host == "" {
+		host = "https://api.sendgrid.com"
 	}
-
-	return Client
+	baseURL := host + endpoint
+	requestHeaders := map[string]string{
+		"Authorization": "Bearer " + key,
+		"User-Agent": "sendgrid/" + Version + ";go",
+		"Accept": "application/json",
+	}
+	request := rest.Request{
+		BaseURL: baseURL,
+		Headers: requestHeaders,
+	}
+	return request
 }
 
-// NewSendGridClient will return a new SGClient. Used for api key
-func NewSendGridClientWithApiKey(apiKey string) *SGClient {
-	apiMail := "https://api.sendgrid.com/api/mail.send.json?"
-
-	Client := &SGClient{
-		apiPwd:  apiKey,
-		APIMail: apiMail,
-	}
-
-	return Client
+// Send sends an email through SendGrid
+func (cl *Client) Send(email *mail.SGMailV3) (*rest.Response, error) {
+	cl.Body = mail.GetRequestBody(email)
+	return API(cl.Request)
 }
 
-func (sg *SGClient) buildURL(m *SGMail) (url.Values, error) {
-	values := url.Values{}
-	if sg.apiUser != "" {
-		values.Set("api_user", sg.apiUser)
-		values.Set("api_key", sg.apiPwd)
-	}
-	values.Set("subject", m.Subject)
-	values.Set("html", m.HTML)
-	values.Set("text", m.Text)
-	values.Set("from", m.From)
-	values.Set("replyto", m.ReplyTo)
-	apiHeaders, err := m.SMTPAPIHeader.JSONString()
-	if err != nil {
-		return nil, fmt.Errorf("sendgrid.go: error:%v", err)
-	}
-	values.Set("x-smtpapi", apiHeaders)
-	headers, err := m.HeadersString()
-	if err != nil {
-		return nil, fmt.Errorf("sendgrid.go: error: %v", err)
-	}
-	values.Set("headers", headers)
-	if len(m.FromName) != 0 {
-		values.Set("fromname", m.FromName)
-	}
-	for i := 0; i < len(m.To); i++ {
-		values.Add("to[]", m.To[i])
-	}
-	for i := 0; i < len(m.Cc); i++ {
-		values.Add("cc[]", m.Cc[i])
-	}
-	for i := 0; i < len(m.Bcc); i++ {
-		values.Add("bcc[]", m.Bcc[i])
-	}
-	for i := 0; i < len(m.ToName); i++ {
-		values.Add("toname[]", m.ToName[i])
-	}
-	for k, v := range m.Files {
-		values.Set("files["+k+"]", v)
-	}
-	for k, v := range m.Content {
-		values.Set("content["+k+"]", v)
-	}
-	return values, nil
+// NewSendClient constructs a new SendGrid client given an API key
+func NewSendClient(key string) *Client {
+	request := GetRequest(key, "/v3/mail/send", "")
+	request.Method = "POST"
+	return &Client{request}
 }
 
-// Send will send mail using SG web API
-func (sg *SGClient) Send(m *SGMail) error {
-	if sg.Client == nil {
-		sg.Client = &http.Client{
-			Transport: http.DefaultTransport,
-			Timeout:   5 * time.Second,
+// DefaultClient is used if no custom HTTP client is defined
+var DefaultClient = rest.DefaultClient
+
+// API sets up the request to the SendGrid API, this is main interface.
+// This function is deprecated. Please use the MakeRequest or
+// MakeRequestAsync functions.
+func API(request rest.Request) (*rest.Response, error) {
+	return DefaultClient.API(request)
+}
+
+// MakeRequest attemps a SendGrid request synchronously.
+func MakeRequest(request rest.Request) (*rest.Response, error) {
+	return DefaultClient.API(request)
+}
+
+// MakeRequestRetry a synchronous request, but retry in the event of a rate
+// limited response.
+func MakeRequestRetry(request rest.Request) (*rest.Response, error) {
+	retry := 0
+	var response *rest.Response
+	var err error
+
+	for {
+		response, err = DefaultClient.API(request)
+		if err != nil {
+			return nil, err
 		}
-	}
-	var e error
-	values, e := sg.buildURL(m)
-	if e != nil {
-		return e
-	}
-	req, e := http.NewRequest("POST", sg.APIMail, strings.NewReader(values.Encode()))
-	if e != nil {
-		return e
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", "sendgrid/"+Version+";go")
 
-	// Using API key
-	if sg.apiUser == "" {
-		req.Header.Set("Authorization", "Bearer "+sg.apiPwd)
+		if response.StatusCode != http.StatusTooManyRequests {
+			return response, nil
+		}
+
+		if retry > rateLimitRetry {
+			return nil, errors.New("Rate limit retry exceeded")
+		}
+		retry++
+
+		resetTime := time.Now().Add(rateLimitSleep * time.Millisecond)
+
+		reset, ok := response.Headers["X-RateLimit-Reset"]
+		if ok && len(reset) > 0 {
+			t, err := strconv.Atoi(reset[0])
+			if err == nil {
+				resetTime = time.Unix(int64(t), 0)
+			}
+		}
+		time.Sleep(resetTime.Sub(time.Now()))
 	}
+}
 
-	res, e := sg.Client.Do(req)
-	if e != nil {
-		return fmt.Errorf("sendgrid.go: error:%v; response:%v", e, res)
-	}
+// MakeRequestAsync attempts a request asynchronously in a new go
+// routine. This function returns two channels: responses
+// and errors. This function will retry in the case of a
+// rate limit.
+func MakeRequestAsync(request rest.Request) (chan *rest.Response, chan error) {
+	r := make(chan *rest.Response)
+	e := make(chan error)
 
-	defer res.Body.Close()
+	go func() {
+		response, err := MakeRequestRetry(request)
+		if err != nil {
+			e <- err
+		}
+		if response != nil {
+			r <- response
+		}
+	}()
 
-	if res.StatusCode == http.StatusOK {
-		return nil
-	}
-
-	body, _ := ioutil.ReadAll(res.Body)
-
-	return fmt.Errorf("sendgrid.go: code:%d error:%v body:%s", res.StatusCode, e, body)
+	return r, e
 }

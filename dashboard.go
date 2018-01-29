@@ -7,9 +7,9 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
-	"hkjn.me/probes"
 	"hkjn.me/src/config"
 	"hkjn.me/src/googleauth"
+	"hkjn.me/src/probes"
 )
 
 var (
@@ -50,8 +50,7 @@ type Config struct {
 	AllowedGoogleIds []string
 	GoogleServiceId  string
 	GoogleSecret     string
-	SendgridUser     string
-	SendgridPassword string
+	SendgridToken    string
 	EmailSender      string
 	EmailRecipient   string
 }
@@ -62,19 +61,14 @@ func setProbesCfg(conf Config, emailTemplate string) error {
 		glog.Infoln("Starting in debug mode (no auth)..")
 		return nil
 	}
-	glog.V(1).Infof("Our sendgrid.com user is %q\n", conf.SendgridUser)
-	if conf.SendgridUser == "" {
-		return errors.New("no sendgrid user")
-	}
 	// TODO(hkjn): Unify probes.Config vs dashboard.Config.
-	probes.Config.Sendgrid.User = conf.SendgridUser
-	if conf.SendgridPassword == "" {
-		return errors.New("no sendgrid password")
+	probes.Config.SendgridToken = conf.SendgridToken
+	if conf.SendgridToken == "" {
+		return errors.New("no DASHBOARD_SENDGRIDTOKEN specified")
 	}
-	probes.Config.Sendgrid.Password = conf.SendgridPassword
 
 	if conf.EmailSender == "" {
-		return errors.New("no email sender")
+		return errors.New("no DASHBOARD_EMAILSENDER specified")
 	}
 	glog.V(1).Infof(
 		"Sending any alert emails from %q to %q\n",
@@ -83,7 +77,7 @@ func setProbesCfg(conf Config, emailTemplate string) error {
 	)
 	probes.Config.Alert.Sender = conf.EmailSender
 	if conf.EmailRecipient == "" {
-		return errors.New("no email recipient")
+		return errors.New("no DASHBOARD_EMAILRECIPIENT specified")
 	}
 	probes.Config.Alert.Recipient = conf.EmailRecipient
 	if emailTemplate == "" {

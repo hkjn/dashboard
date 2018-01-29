@@ -8,9 +8,9 @@ import (
 
 	"github.com/golang/glog"
 
-	"hkjn.me/prober"
-	"hkjn.me/probes/dnsprobe"
-	"hkjn.me/probes/webprobe"
+	"hkjn.me/src/prober"
+	"hkjn.me/src/probes/dnsprobe"
+	"hkjn.me/src/probes/webprobe"
 )
 
 // TODO(hkjn): Add support for sending POST requests in webprobe.
