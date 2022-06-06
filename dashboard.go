@@ -3,13 +3,18 @@ package dashboard // import "hkjn.me/dashboard"
 
 import (
 	"errors"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"sync"
 
-	"github.com/golang/glog"
 	"github.com/gorilla/mux"
-	"hkjn.me/src/config"
-	"hkjn.me/src/googleauth"
-	"hkjn.me/src/probes"
+
+	"hkjn.me/config"
+	"hkjn.me/prober"
+	"hkjn.me/probes"
+
+	"hkjn.me/dashboard/gen"
 )
 
 var (
@@ -26,6 +31,9 @@ Failure details follow:<br/>
 		WebProbes []struct {
 			Target, Want, Name string
 			WantStatus         int
+		}
+		VarsProbes []struct {
+			Target, Name, Key, WantValue string
 		}
 		DnsProbes []struct {
 			Target  string
@@ -45,11 +53,9 @@ Failure details follow:<br/>
 )
 
 type Config struct {
-	Debug            bool
+	Debug            bool `default:"true"`
 	BindAddr         string
 	AllowedGoogleIds []string
-	GoogleServiceId  string
-	GoogleSecret     string
 	SendgridToken    string
 	EmailSender      string
 	EmailRecipient   string
@@ -58,7 +64,7 @@ type Config struct {
 // setProbeCfg sets the config values.
 func setProbesCfg(conf Config, emailTemplate string) error {
 	if conf.Debug {
-		glog.Infoln("Starting in debug mode (no auth)..")
+		log.Printf("Starting in debug mode..")
 		return nil
 	}
 	// TODO(hkjn): Unify probes.Config vs dashboard.Config.
@@ -70,11 +76,13 @@ func setProbesCfg(conf Config, emailTemplate string) error {
 	if conf.EmailSender == "" {
 		return errors.New("no DASHBOARD_EMAILSENDER specified")
 	}
-	glog.V(1).Infof(
-		"Sending any alert emails from %q to %q\n",
-		conf.EmailSender,
-		conf.EmailRecipient,
-	)
+	if conf.Debug {
+		log.Printf(
+			"Sending any alert emails from %q to %q\n",
+			conf.EmailSender,
+			conf.EmailRecipient,
+		)
+	}
 	probes.Config.Alert.Sender = conf.EmailSender
 	if conf.EmailRecipient == "" {
 		return errors.New("no DASHBOARD_EMAILRECIPIENT specified")
@@ -85,41 +93,52 @@ func setProbesCfg(conf Config, emailTemplate string) error {
 	}
 	probes.Config.Template = emailTemplate
 
-	if conf.GoogleServiceId == "" {
-		return errors.New("no service ID")
+	if conf.Debug {
+		log.Printf("These Google+ IDs are allowed access: %q\n", conf.AllowedGoogleIds)
 	}
-	glog.V(1).Infof("Our Google service ID is %q\n", conf.GoogleServiceId)
-	if conf.GoogleSecret == "" {
-		return errors.New("no service secret")
-	}
-	googleauth.SetCredentials(conf.GoogleServiceId, conf.GoogleSecret)
-	if len(conf.AllowedGoogleIds) == 0 {
-		return errors.New("no allowed IDs")
-	}
-	glog.V(1).Infof("These Google+ IDs are allowed access: %q\n", conf.AllowedGoogleIds)
-	googleauth.SetGatingFunc(func(id string) bool {
-		for _, aid := range conf.AllowedGoogleIds {
-			if id == aid {
-				return true
-			}
-		}
-		return false
-	})
 	return nil
+}
+
+// getIndexData returns the data for the index page.
+//
+// TODO: offer alternative auth other than defunct Google+ login
+// TODO: improve style of web page, add details like DNS records probed
+//       when clicking probe heading
+func getIndexData(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	data := struct {
+		Version string
+		Links   []struct {
+			Name, URL string
+		}
+		Probes         []*prober.Probe
+		ProberDisabled bool
+	}{}
+	data.Version = gen.Version
+	data.Probes = getProbes()
+	data.ProberDisabled = *proberDisabled
+	return data, nil
 }
 
 // Start returns the HTTP routes for the dashboard.
 func Start(conf Config) *mux.Router {
-	config.MustLoad(&probecfg, config.Name("probes.yaml"))
+	r := func(filename string) ([]byte, error) {
+		return ioutil.ReadFile(filename)
+	}
+	if !conf.Debug {
+		r = func(filename string) ([]byte, error) {
+			return gen.Asset(filename)
+		}
+	}
+	config.MustLoadNameFrom("probes.yaml", &probecfg, r)
 
 	ps := getProbes()
-	glog.Infof("Starting %d probes..\n", len(ps))
+	log.Printf("Starting %d probes..\n", len(ps))
 	for _, p := range ps {
 		go p.Run()
 	}
 
 	if err := setProbesCfg(conf, emailTemplate); err != nil {
-		glog.Fatalf("FATAL: Couldn't set probes config: %v\n", err)
+		log.Fatalf("FATAL: Couldn't set probes config: %v\n", err)
 	}
 	return newRouter(conf.Debug)
 }

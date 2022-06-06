@@ -2,15 +2,16 @@ package dashboard
 
 import (
 	"flag"
+	"log"
 	"net"
 	"sort"
 	"sync"
+	"time"
 
-	"github.com/golang/glog"
-
-	"hkjn.me/src/prober"
-	"hkjn.me/src/probes/dnsprobe"
-	"hkjn.me/src/probes/webprobe"
+	"hkjn.me/prober"
+	"hkjn.me/probes/dnsprobe"
+	"hkjn.me/probes/varsprobe"
+	"hkjn.me/probes/webprobe"
 )
 
 // TODO(hkjn): Add support for sending POST requests in webprobe.
@@ -20,20 +21,38 @@ var (
 	createOnce     = sync.Once{}
 )
 
+// getWebProbes returns the web probes.
 func getWebProbes() prober.Probes {
 	probes := prober.Probes{}
 	for _, p := range probecfg.WebProbes {
-		probes = append(probes,
-			webprobe.New(
-				p.Target,
-				"GET",
-				p.WantStatus,
-				webprobe.Name(p.Name),
-				webprobe.InResponse(p.Want)))
+		wp := webprobe.NewWithGeneric(
+			p.Target,
+			"GET",
+			p.WantStatus,
+			[]prober.Option{prober.Interval(time.Minute * 2)},
+			webprobe.Name(p.Name),
+			webprobe.InResponse(p.Want))
+		probes = append(probes, wp)
 	}
 	return probes
 }
 
+// getVarsProbes returns the vars probes.
+func getVarsProbes() prober.Probes {
+	probes := prober.Probes{}
+	for _, p := range probecfg.VarsProbes {
+		probes = append(probes,
+			varsprobe.New(
+				p.Target,
+				varsprobe.Name(p.Name),
+				varsprobe.Key(p.Key),
+				varsprobe.WantValue(p.WantValue),
+			))
+	}
+	return probes
+}
+
+// getDnsProbes returns the dns probes.
 func getDnsProbes() prober.Probes {
 	probes := prober.Probes{}
 	for _, p := range probecfg.DnsProbes {
@@ -48,11 +67,15 @@ func getDnsProbes() prober.Probes {
 		for _, ns := range p.Records.Ns {
 			nsRecords = append(nsRecords, &net.NS{Host: ns})
 		}
-		probes = append(
-			probes,
-			dnsprobe.New(
-				p.Target, dnsprobe.MX(mxRecords), dnsprobe.A(p.Records.A),
-				dnsprobe.NS(nsRecords), dnsprobe.CNAME(p.Records.Cname), dnsprobe.TXT(p.Records.Txt)))
+		p := dnsprobe.New(
+			p.Target,
+			dnsprobe.MX(mxRecords),
+			dnsprobe.A(p.Records.A),
+			dnsprobe.NS(nsRecords),
+			dnsprobe.CNAME(p.Records.Cname),
+			dnsprobe.TXT(p.Records.Txt))
+		log.Printf("adding dnsprobe: %v\n", p)
+		probes = append(probes, p)
 	}
 	return probes
 }
@@ -60,14 +83,7 @@ func getDnsProbes() prober.Probes {
 // getProbes returns all probes in the dashboard.
 func getProbes() prober.Probes {
 	createOnce.Do(func() {
-		if !flag.Parsed() {
-			flag.Parse()
-		}
-		if *proberDisabled {
-			glog.Infof("Probes are disabled with -no_probes\n")
-		} else {
-			allProbes = append(getDnsProbes(), getWebProbes()...)
-		}
+		allProbes = append(getDnsProbes(), getWebProbes()...)
 	})
 	sort.Sort(allProbes)
 	return allProbes

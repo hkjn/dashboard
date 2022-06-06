@@ -2,17 +2,17 @@ package dashboard
 
 import (
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 
-	"hkjn.me/src/googleauth"
-
-	"github.com/golang/glog"
 	"github.com/gorilla/mux"
+
+	"hkjn.me/dashboard/gen"
 )
 
 var (
-	authDisabled = false
-	baseTmpls    = []string{
+	baseTmpls = []string{
 		"tmpl/base.tmpl",
 		"tmpl/scripts.tmpl",
 		"tmpl/style.tmpl",
@@ -30,29 +30,39 @@ var (
 //
 // newRouter panics if the config wasn't loaded.
 func newRouter(debug bool) *mux.Router {
-	routes := []route{
-		newPage("/", indexTmpls, getIndexData),
-		simpleRoute{"/connect", "GET", googleauth.ConnectHandler},
-	}
-	if debug {
-		authDisabled = true // TODO(hkjn): Avoid global variable.
-	}
+	prefix := getHttpPrefix()
+	// xx: since we only have the index page, can parse template (
+	// via either bindata or .tmpl from disk) higher up in call chain than newPage().
+	r := newPage(prefix+"/", indexTmpls, getIndexData, debug)
 
 	router := mux.NewRouter().StrictSlash(true)
-	for _, r := range routes {
-		glog.V(1).Infof("Registering route for %q on %q\n", r.Method(), r.Pattern())
-		router.
-			Methods(r.Method()).
-			Path(r.Pattern()).
-			HandlerFunc(r.HandlerFunc())
-	}
+	log.Printf("Registering route for %q on %q\n", r.Method(), r.Pattern())
+	router.
+		Methods(r.Method()).
+		Path(r.Pattern()).
+		HandlerFunc(r.HandlerFunc())
 	return router
+}
+
+func getHttpPrefix() string {
+	return os.Getenv("DASHBOARD_HTTP_PREFIX")
 }
 
 // getTemplate returns the template loaded from the paths.
 //
 // getTemplate parses the .tmpl files from disk.
-func getTemplate(tmpls []string) *template.Template {
+func getTemplate(tmpls []string, debug bool) *template.Template {
+	if !debug {
+		s := ""
+		for _, filename := range tmpls {
+			b, err := gen.Asset(filename)
+			if err != nil {
+				log.Fatalf("failed to fetch .tmpl with Asset(): %v\n", err)
+			}
+			s += string(b)
+		}
+		return template.Must(template.New("main").Parse(s))
+	}
 	return template.Must(template.ParseFiles(tmpls...))
 }
 
@@ -91,10 +101,10 @@ type page struct {
 }
 
 // newPage returns a new page.
-func newPage(pattern string, tmpls []string, getData getDataFn) *page {
+func newPage(pattern string, tmpls []string, getData getDataFn, debug bool) *page {
 	return &page{
 		pattern,
-		getTemplate(tmpls),
+		getTemplate(tmpls, debug),
 		getData,
 	}
 }
@@ -109,22 +119,18 @@ func (p page) HandlerFunc() http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		data, err := p.getTemplateData(w, r)
 		if err != nil {
-			glog.Errorf("error getting template data: %v\n", err)
+			log.Printf("error getting template data: %v\n", err)
 			serveISE(w)
 			return
 		}
 		err = p.tmpl.ExecuteTemplate(w, baseTemplate, data)
 		if err != nil {
-			glog.Errorf("error rendering template: %v\n", err)
+			log.Printf("error rendering template: %v\n", err)
 			serveISE(w)
 			return
 		}
 	}
 
-	if authDisabled {
-		glog.V(1).Infof("Auth is disabled is set, not checking credentials\n")
-	} else {
-		fn = googleauth.RequireLogin(fn)
-	}
+	log.Printf("Auth is disabled is set, not checking credentials\n")
 	return fn
 }
